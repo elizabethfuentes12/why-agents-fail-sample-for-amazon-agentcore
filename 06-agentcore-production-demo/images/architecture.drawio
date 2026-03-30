@@ -11,12 +11,12 @@
         </mxCell>
 
         <!-- Stack 1 -->
-        <mxCell id="stack1_box" value="HotelBookingAgentStack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#147EBA;strokeWidth=2;dashed=1;fontSize=14;fontStyle=1;fontColor=#147EBA;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;" vertex="1" parent="region">
+        <mxCell id="stack1_box" value="HotelBookingAgentStack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#147EBA;strokeWidth=2;dashed=1;fontSize=14;fontStyle=1;fontColor=#147EBA;verticalAlign=top;align=left;spacingLeft=30;spacingTop=5;" vertex="1" parent="region">
           <mxGeometry x="15" y="35" width="820" height="280" as="geometry" />
         </mxCell>
 
         <!-- Stack 2 -->
-        <mxCell id="stack2_box" value="GraphRAGStack (optional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3F8624;strokeWidth=2;dashed=1;fontSize=14;fontStyle=1;fontColor=#3F8624;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;" vertex="1" parent="region">
+        <mxCell id="stack2_box" value="GraphRAGStack (optional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3F8624;strokeWidth=2;dashed=1;fontSize=14;fontStyle=1;fontColor=#3F8624;verticalAlign=top;align=left;spacingLeft=30;spacingTop=5;" vertex="1" parent="region">
           <mxGeometry x="15" y="355" width="820" height="310" as="geometry" />
         </mxCell>
 
@@ -85,7 +85,7 @@
           <mxGeometry x="200" y="560" width="60" height="60" as="geometry" />
         </mxCell>
 
-        <mxCell id="ssm" value="AWS Systems Manager&lt;div&gt;&lt;b&gt;Parameter Store&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;(cross-stack)&lt;/i&gt;&lt;/div&gt;" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.systems_manager_parameter_store;" vertex="1" parent="region">
+        <mxCell id="ssm" value="AWS Systems Manager&lt;div&gt;&lt;b&gt;Parameter Store&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;(cross-stack)&lt;/i&gt;&lt;/div&gt;" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.parameter_store;" vertex="1" parent="region">
           <mxGeometry x="390" y="560" width="60" height="60" as="geometry" />
         </mxCell>
 
@@ -152,8 +152,8 @@
         <mxCell id="ev2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;flowAnimation=1;strokeColor=#009900;strokeWidth=2;" edge="1" parent="region" source="lambda_booking" target="lambda_query">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="420" y="340" />
-              <mxPoint x="420" y="340" />
+              <mxPoint x="490" y="160" />
+              <mxPoint x="490" y="390" />
             </Array>
           </mxGeometry>
         </mxCell>
