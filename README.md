@@ -27,6 +27,10 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 | 05 | [Agent Control Steering](./05-agent-control-demo/) | Hard-blocking stops the task instead of fixing it | Agent self-corrects instead of failing | ![Agent Control](https://img.shields.io/badge/Agent_Control-orange?style=flat) |
 | 06 | [Amazon Bedrock AgentCore Production](./06-agentcore-production-demo/) | Taking all techniques to production on AWS | Full deployment with CDK, Lambda, DynamoDB, Amazon Bedrock AgentCore | ![AWS CDK](https://img.shields.io/badge/CDK-v2-FF9900?style=flat&logo=amazon-aws) ![DynamoDB](https://img.shields.io/badge/DynamoDB-4053D6?style=flat&logo=amazon-dynamodb) ![Lambda](https://img.shields.io/badge/Lambda-FF9900?style=flat&logo=aws-lambda) |
 
+### Demo 06 — Production Architecture
+
+![Demo 06 Production Architecture — Amazon Bedrock AgentCore with Lambda, DynamoDB, Graph-RAG, and steering rules](./06-agentcore-production-demo/images/architecture.svg)
+
 ---
 
 ## How the Demos Connect
