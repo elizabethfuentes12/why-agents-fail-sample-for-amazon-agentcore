@@ -61,3 +61,5 @@ deployment_package.zip
 
 # Generated diagrams (MCP diagram server output)
 generated-diagrams/
+
+/blog-es
