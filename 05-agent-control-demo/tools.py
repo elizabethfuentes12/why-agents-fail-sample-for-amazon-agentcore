@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Booking tools — clean, no validation logic.
 
 Same tools used by both approaches (Hooks and Agent Control).
@@ -12,7 +14,7 @@ from strands import tool
 
 STATE = {
     "bookings": {
-        "BK001": {"hotel": "Grand Hotel", "check_in": "2026-04-15", "guests": 2, "total": 400},
+        "BK001": {"hotel": "AnyCompany Lisbon Resort", "check_in": "2026-04-15", "guests": 2, "total": 400},
     },
     "payments": {},
 }

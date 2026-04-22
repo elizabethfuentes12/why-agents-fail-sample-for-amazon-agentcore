@@ -6,7 +6,7 @@
 [![Strands Agents](https://img.shields.io/badge/Strands_Agents-1.27+-00B4D8.svg?style=flat)](https://strandsagents.com)
 [![Agent Control](https://img.shields.io/badge/Agent_Control-Steer_&_Deny-orange.svg?style=flat)](https://github.com/agentcontrol/agent-control)
 
-> Hooks (lifecycle event handlers that intercept agent actions) block rule violations with `cancel_tool` — the agent reports failure and the user must retry. Agent Control goes further: it **steers** the agent to fix the problem and complete the task, instead of failing.
+> Hooks are functions that run at specific points in an agent's lifecycle. In this demo, hooks intercept tool calls and block them using `cancel_tool` when a business rule is violated. The agent reports failure and the user must retry. Agent Control goes further: it **steers** the agent to fix the problem and complete the task, instead of failing.
 
 ![Hooks (Block) vs Agent Control (Self-Correct) comparison](./images/hooks-vs-agent-control.jpg)
 
@@ -20,7 +20,7 @@ This demo uses Strands Agents and Agent Control. The guardrail patterns demonstr
 
 [Demo 04 (Neurosymbolic Guardrails)](../04-neurosymbolic-demo/) demonstrates that hooks can enforce business rules at the tool level. When a rule is violated, `cancel_tool` blocks the call and the agent tells the user it cannot proceed.
 
-But blocking alone has limitations. If a user requests 15 guests and the maximum is 10, the agent could adjust to 10 and complete the booking. Instead, with hooks alone, it asks the user to change their request — interrupting the flow.
+But blocking alone has limitations. If a user requests 15 guests and the maximum is 10, the agent could adjust to 10 and complete the booking. Instead, with hooks alone, it asks the user to change their request, interrupting the flow.
 
 ## The Solution: Steer Instead of Block
 
@@ -41,7 +41,7 @@ But blocking alone has limitations. If a user requests 15 guests and the maximum
 | When a rule fails | `cancel_tool = "BLOCKED"` → agent fails | `Guide("reduce to 10")` → agent retries corrected |
 | To change a rule | Edit code, redeploy | API call or dashboard — no code changes |
 | Integration | `HookProvider` + `hooks=[...]` | `Plugin` + `plugins=[...]` |
-| Evaluators | Custom Python lambdas | regex, list, JSON schema, AI (Galileo Luna-2) |
+| Evaluators | Custom Python lambdas | regex (pattern matching), list (exact value matching), JSON schema (structure validation), AI via Galileo Luna-2 (semantic evaluation) |
 | Scope | `BeforeToolCallEvent` only | LLM input/output, tool input/output, pre/post |
 
 ## The Tools
@@ -91,7 +91,7 @@ This demo uses the **server approach**. See the [Agent Control docs](https://doc
 ## Prerequisites
 
 - Python 3.9+
-- OpenAI API key — get one at https://platform.openai.com/api-keys (or use any [supported model provider](https://strandsagents.com/docs/user-guide/concepts/model-providers/) such as Amazon Bedrock or Anthropic)
+- OpenAI API key — get one at https://platform.openai.com/api-keys (or use any [supported model provider](https://strandsagents.com/docs/user-guide/concepts/model-providers/amazon-bedrock/) such as Amazon Bedrock or Anthropic)
 - [Agent Control server](https://docs.agentcontrol.dev/) running locally (see [setup instructions](https://github.com/agentcontrol/agent-control))
 
 ---
@@ -184,7 +184,7 @@ Stop the Agent Control server following the [shutdown instructions](https://docs
 - [Agent Control Plugin](https://strandsagents.com/docs/community/plugins/agent-control/) — Strands integration docs
 - [Strands Hooks](https://strandsagents.com/docs/user-guide/concepts/agents/hooks/) — `BeforeToolCallEvent`, `cancel_tool`
 - [Strands Steering](https://strandsagents.com/docs/user-guide/concepts/plugins/steering/) — `Guide`, `Proceed`, `SteeringHandler`
-- [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) — Swap to Amazon Bedrock, Anthropic, Ollama
+- [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/amazon-bedrock/) — Swap to Amazon Bedrock, Anthropic, Ollama
 
 ### Agent Control
 - [Agent Control GitHub](https://github.com/agentcontrol/agent-control) — Open source, Apache 2.0
@@ -196,7 +196,7 @@ Stop the Agent Control server following the [shutdown instructions](https://docs
 
 ### What is the difference between Agent Control and Amazon Bedrock AgentCore?
 
-They are different products. **Agent Control** is an open-source guardrail server that evaluates agent actions and returns steer/deny decisions — it runs locally or on any infrastructure. **Amazon Bedrock AgentCore** is an AWS managed service for hosting and deploying agents in production with MCP routing, observability, and scaling. Demo 05 uses Agent Control for steering; [Demo 06](../06-agentcore-production-demo/) uses Amazon Bedrock AgentCore for production deployment.
+They are different products. **Agent Control** is an open-source guardrail server that evaluates agent actions and returns steer/deny decisions — it runs locally or on any infrastructure. **Amazon Bedrock AgentCore** is an AWS managed service for hosting and deploying agents in production with MCP routing, observability, and scaling. Demo 05 uses Agent Control for steering; [Demo 06](../06-agentcore-cdk-demo/) uses Amazon Bedrock AgentCore for production deployment.
 
 ### When should I use steering (Agent Control) instead of blocking (hooks)?
 
@@ -211,7 +211,7 @@ Yes. The steer-instead-of-block pattern is framework-agnostic. Agent Control int
 ## Navigation
 
 - **Previous:** [Demo 04 - Neurosymbolic Guardrails](../04-neurosymbolic-demo/)
-- **Next:** [Demo 06 - Amazon Bedrock AgentCore Production](../06-agentcore-production-demo/) — Deploy all techniques to production on AWS
+- **Next:** [Demo 06 - Amazon Bedrock AgentCore Production](../06-agentcore-cdk-demo/) — Deploy all techniques to production on AWS
 
 ---
 
