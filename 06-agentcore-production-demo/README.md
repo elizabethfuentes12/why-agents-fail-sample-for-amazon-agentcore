@@ -367,6 +367,46 @@ See the [observability getting started guide](https://docs.aws.amazon.com/bedroc
 
 ---
 
+## Latency Benchmarks
+
+Tool latency matters in production agents — every tool call adds to the end-to-end response time. These benchmarks measure real [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) execution duration (from [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) REPORT lines), not CLI round-trip time.
+
+### DynamoDB-backed tools
+
+| Function | Cold start | Warm p50 | Warm p90 | Memory used |
+|----------|:----------:|:--------:|:--------:|:-----------:|
+| `validate_booking_rules` | ~550-620 ms | ~25 ms | ~105 ms | 88 MB / 256 MB |
+| `search_available_hotels` | ~540-660 ms | ~16 ms | ~43 ms | 88 MB / 256 MB |
+
+**Key takeaways:**
+
+- **Warm invocations are fast:** [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) single-digit-ms reads translate to **10-30 ms** Lambda execution for steering rule validation
+- **Cold starts are predictable:** ~450-540 ms Init + ~110 ms execution = ~600 ms total, only on first invocation after idle period
+- **Why this matters for steering:** The `validate_booking_rules` tool runs before every booking action. At ~25 ms warm, it adds negligible latency while preventing hallucinated bookings that violate business rules — a worthwhile trade-off vs. fixing bad bookings after the fact
+
+### Neo4j AuraDB (GraphRAG)
+
+| Function | Cold start | Warm p50 | Warm p90 | Memory used |
+|----------|:----------:|:--------:|:--------:|:-----------:|
+| `query_knowledge_graph` | ~1.9-2.0 s | ~13 ms | ~75 ms | 122 MB / 256 MB |
+
+[Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/) runs outside your VPC, but the [neo4j Python driver](https://neo4j.com/docs/python-manual/current/) reuses TCP connections across warm invocations. After the first call resolves credentials from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) and establishes the connection, subsequent [Cypher](https://neo4j.com/docs/cypher-manual/current/) queries execute in **11-30 ms** — comparable to [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el). Cold starts are higher (~2s) due to the neo4j driver initialization + TLS handshake + Secrets Manager lookups.
+
+### Comparison: DynamoDB vs Neo4j AuraDB
+
+| Metric | DynamoDB (steering rules) | Neo4j AuraDB (knowledge graph) |
+|--------|:-------------------------:|:------------------------------:|
+| **Warm p50** | ~16-25 ms | ~13 ms |
+| **Warm p90** | ~43-105 ms | ~75 ms |
+| **Cold start** | ~550-660 ms | ~1.9-2.0 s |
+| **Driver reuse** | boto3 (local) | neo4j driver (TCP keepalive) |
+
+Both backends deliver sub-100ms warm latency, which means tool calls add minimal overhead to the agent's end-to-end response time. The cold start difference (~600 ms vs ~2s) is only relevant for the first invocation after an idle period.
+
+> **Benchmark methodology:** 10 consecutive invocations per function using `aws lambda invoke` against the deployed stack in `us-east-1`. Duration values extracted from [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) Lambda REPORT log lines. Cold start = Init Duration + Duration. Warm = Duration only (no Init).
+
+---
+
 ## Troubleshooting
 
 **Agent returns 500 error:** Check [Amazon CloudWatch Logs](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) under `/aws/bedrock-agentcore/runtimes/` for the runtime logs.
