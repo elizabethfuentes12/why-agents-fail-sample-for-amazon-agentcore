@@ -63,3 +63,6 @@ deployment_package.zip
 generated-diagrams/
 
 /blog-es
+
+# Private beta testing files
+invoke.py
