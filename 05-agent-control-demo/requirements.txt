@@ -1,5 +1,9 @@
+# Requires Python >= 3.12 (agent-control-sdk drops 3.11 from v1.1.2 onward;
+# on Python 3.11 the resolver can only install the empty 0.0.1 placeholder).
 strands-agents>=1.27.0
 boto3>=1.35.0
-agent-control-sdk>=0.0.1
+agent-control-sdk[strands-agents]>=7.5.0
+strands-agents[openai]>=1.27.0
 python-dotenv>=1.0.0
 pyyaml>=6.0
+

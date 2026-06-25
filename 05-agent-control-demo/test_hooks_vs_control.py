@@ -22,7 +22,9 @@ os.environ["OTEL_SDK_DISABLED"] = "true"
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# override=True ensures the .env value wins over any stale placeholder left in
+# the environment from a previous run.
+load_dotenv(override=True)
 
 from strands import Agent
 from strands.hooks import HookProvider, HookRegistry, BeforeToolCallEvent
@@ -50,18 +52,21 @@ def _inject_local_controls() -> None:
     except Exception as e:
         print(f"⚠️  Could not load local controls: {e}")
 
-# Model configuration — Amazon Bedrock (default, requires AWS credentials)
-# Strands Agents uses Bedrock by default. No extra import needed.
-# To use a specific Bedrock model, pass the model ID as a string:
-#   MODEL = "us.anthropic.claude-sonnet-4-20250514-v1:0"
-#
-# To use a different provider (e.g., OpenAI), install the extra and configure:
-#   pip install "strands-agents[openai]"
-#   from strands.models.openai import OpenAIModel
-#   MODEL = OpenAIModel(model_id="gpt-4o-mini")
-#   (requires OPENAI_API_KEY env var — get one at https://platform.openai.com/api-keys)
-#
-# See all providers: https://strandsagents.com/docs/user-guide/concepts/model-providers/
+# Model configuration — OpenAI gpt-4o-mini (matches the other demos in this series).
+# Requires OPENAI_API_KEY in .env — get one at https://platform.openai.com/api-keys
+# To use a different provider (Amazon Bedrock, Anthropic, Ollama, etc.), swap the
+# model below — see https://strandsagents.com/docs/user-guide/concepts/model-providers/
+if not os.environ.get("OPENAI_API_KEY") or os.environ["OPENAI_API_KEY"].startswith("your-key"):
+    raise ValueError(
+        "OPENAI_API_KEY not set. Add it to 05-agent-control-demo/.env "
+        "(OPENAI_API_KEY=sk-...). Get a key at "
+        "https://platform.openai.com/api-keys"
+    )
+
+# Using OpenAI-compatible interface via Strands SDK (not direct OpenAI usage)
+from strands.models.openai import OpenAIModel
+
+MODEL = OpenAIModel(model_id="gpt-4o-mini")
 
 QUERY = "Book AnyCompany Lisbon Resort for 15 guests from 2026-05-01 to 2026-05-03"
 
@@ -102,7 +107,7 @@ def run_test_1_hooks():
     print(f"Query: {QUERY}\n")
 
     hook = MaxGuestsHook()
-    agent = Agent(system_prompt=PROMPT, tools=ALL_TOOLS, hooks=[hook])
+    agent = Agent(model=MODEL, system_prompt=PROMPT, tools=ALL_TOOLS, hooks=[hook])
 
     start = time.time()
     response = agent(QUERY)
@@ -175,7 +180,7 @@ def run_test_2_agent_control():
         enable_logging=False,
     )
 
-    agent = Agent(system_prompt=PROMPT, tools=ALL_TOOLS, plugins=[plugin, steering])
+    agent = Agent(model=MODEL, system_prompt=PROMPT, tools=ALL_TOOLS, plugins=[plugin, steering])
 
     start = time.time()
     try:
