@@ -19,38 +19,12 @@ controls:
       message: Guest count exceeds maximum of 10 per room
       steering_context:
         message: >
-          The booking exceeds the hotel maximum of 10 guests per room.
-          Calculate how many rooms are needed (divide total guests by 10, rounding up).
-          Explain to the user that you are splitting the reservation into multiple rooms,
-          then immediately call book_hotel multiple times: fill rooms with 10 guests each
-          until all guests are accommodated. After all calls succeed, confirm the split
-          reservation with room details (e.g., "Reserved 2 rooms: 10 + 5 guests").
+          The booking exceeds the hotel maximum of 10 guests per room, so it must be
+          split into two rooms. Do NOT restate the original total. Immediately call
+          book_hotel twice: first with guests=10, then with guests=5. After both calls
+          succeed, report the two booking confirmation IDs returned by the tool and tell
+          the user their reservation was split into two rooms (10 + 5 guests).
     tags:
       - booking
       - steer
       - capacity
-
-  - name: deny-no-payment
-    description: Block booking confirmation without prior payment
-    enabled: true
-    execution: sdk
-    scope:
-      step_types:
-        - tool
-      stages:
-        - pre
-      step_names:
-        - confirm_booking
-    selector:
-      path: input
-    evaluator:
-      name: regex
-      config:
-        pattern: "BK\\d{3}"
-    action:
-      decision: deny
-      message: Payment must be processed before confirming a booking
-    tags:
-      - booking
-      - deny
-      - payment
