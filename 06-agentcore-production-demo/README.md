@@ -20,10 +20,10 @@ Demos 01-05 demonstrate techniques that can significantly reduce hallucinations.
 
 | Technique (from demos) | Production implementation |
 |------------------------|--------------------------|
-| **Semantic tool selection** (demo 02) | [Amazon Bedrock AgentCore Gateway](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) with MCP semantic routing — no custom FAISS index needed |
-| **Multi-agent validation** (demo 03) | `validate_booking_rules` tool backed by [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) — same safety, lower latency |
-| **Neurosymbolic guardrails** (demo 04) | Steering rules in [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) — change rules without redeploying |
-| **Agent Control steering** (demo 05) | STEER messages in DynamoDB rules — agent self-corrects instead of failing |
+| **Semantic tool selection** (demo 02) | [Amazon Bedrock AgentCore Gateway](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) with MCP semantic routing (no custom FAISS index needed) |
+| **Multi-agent validation** (demo 03) | `validate_booking_rules` tool backed by [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el): same safety, lower latency |
+| **Neurosymbolic guardrails** (demo 04) | Steering rules in [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el): change rules without redeploying |
+| **Agent Control steering** (demo 05) | STEER messages in DynamoDB rules: agent self-corrects instead of failing |
 | **Graph-RAG** (demo 01) | [Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/) with query [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) |
 
 ## Architecture
@@ -45,7 +45,7 @@ Deploy first. Works without GraphRAG.
 | [Amazon Bedrock AgentCore Runtime](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) | Agent connects to Gateway via MCP to discover and invoke tools |
 | [Amazon Bedrock AgentCore Gateway](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) | MCP semantic routing to Lambda tools |
 | 7 [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) functions | search, book, get_booking, process_payment, confirm, cancel, validate |
-| Hard hooks (in agent) | Payment before confirm, cancellation window 48h — enforced at framework level |
+| Hard hooks (in agent) | Payment before confirm, cancellation window 48h (enforced at framework level) |
 
 ### Stack 2: `GraphRAGStack`
 
@@ -130,14 +130,14 @@ Or open `test_agent_local.ipynb` in your IDE (VS Code, Kiro, or any editor with 
 
 ## Adding GraphRAG (Optional)
 
-GraphRAG adds a knowledge graph for answering questions about hotel amenities, policies, and FAQs. It uses [Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/) — a managed graph database with a free tier ($0/month, 200K nodes, no credit card required).
+GraphRAG adds a knowledge graph for answering questions about hotel amenities, policies, and FAQs. It uses [Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/), a managed graph database with a free tier ($0/month, 200K nodes, no credit card required).
 
 ### Step 1: Create a Neo4j AuraDB Free instance
 
 1. Go to [neo4j.com/cloud/aura-free](https://neo4j.com/cloud/aura-free/) and create a free account
 2. Click **New Instance** → **AuraDB Free**
 3. Choose a name (e.g. `hotel-graphrag`) and region
-4. Save the connection URI and password — you'll need them in Step 3
+4. Save the connection URI and password; you'll need them in Step 3
 
 > **What is Neo4j?** [Neo4j](https://neo4j.com/) is a graph database that stores data as nodes and relationships instead of rows and columns. This lets the agent answer questions like "What amenities does the Grand Hotel have?" by traversing the graph directly (following the connections between data points), instead of guessing from text chunks. Learn more in [demo 01](../01-faq-graphrag-demo/).
 
@@ -152,7 +152,7 @@ INCLUDE_GRAPHRAG=1 cdk deploy GraphRAGStack
 This creates:
 - [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) functions (graph builder + query)
 - [Amazon S3](https://aws.amazon.com/s3/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) bucket with 300 hotel FAQ documents auto-uploaded
-- [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) secrets (empty — you fill them next)
+- [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) secrets (empty; you fill them next)
 
 By default, it deploys in **lite mode** (30 documents, ~15 min build). For the full dataset, see [Full Mode (300 documents)](#full-mode-300-documents) below.
 
@@ -165,12 +165,12 @@ By default, it deploys in **lite mode** (30 documents, ~15 min build). For the f
 |-------------|-------|-----------------|
 | `/GraphRAGStack/neo4j-uri` | Connection URI | Shown after AuraDB instance creation (e.g. `neo4j+s://xxxx.databases.neo4j.io`) |
 | `/GraphRAGStack/neo4j-user` | Username | Shown after creation (default: `neo4j`) |
-| `/GraphRAGStack/neo4j-password` | Password | Auto-generated by AuraDB — save it during creation |
+| `/GraphRAGStack/neo4j-password` | Password | Auto-generated by AuraDB (save it during creation) |
 | `/GraphRAGStack/openai-api-key` | API key | Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 
 ### Step 4: Build the knowledge graph
 
-The graph builder uses [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) with `SimpleKGPipeline` to automatically discover entities and relationships from hotel FAQ documents — no schema hardcoding needed.
+The graph builder uses [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) with `SimpleKGPipeline` to automatically discover entities and relationships from hotel FAQ documents, with no schema hardcoding needed.
 
 Trigger the build (runs in [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el), ~15 min for lite mode):
 
@@ -211,7 +211,7 @@ Rules live in [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cd
 }
 ```
 
-The agent calls `validate_booking_rules` before every booking action. When a rule is violated, it receives the `steer_message` — an instruction on how to self-correct — instead of a hard failure.
+The agent calls `validate_booking_rules` before every booking action. When a rule is violated, it receives the `steer_message` (an instruction on how to self-correct) instead of a hard failure.
 
 **To change a rule** (takes effect immediately, no redeploy):
 
@@ -231,8 +231,8 @@ The runtime includes a `lifecycle_configuration` that controls how long sessions
 
 ```python
 lifecycle_configuration=agentcore.CfnRuntime.LifecycleConfigurationProperty(
-    idle_runtime_session_timeout=900,  # 15 minutes — shuts down if no requests
-    max_lifetime=28800,  # 8 hours — maximum total session lifetime
+    idle_runtime_session_timeout=900,  # 15 minutes: shuts down if no requests
+    max_lifetime=28800,  # 8 hours: maximum total session lifetime
 ),
 ```
 
@@ -361,7 +361,7 @@ strands-agents[openai,otel]>=1.27.0
 aws-opentelemetry-distro>=0.7.0
 ```
 
-With these dependencies, Amazon Bedrock AgentCore automatically instruments Strands Agents — capturing invocation logs, tool call traces (which Lambda was called, input/output, latency), and error tracking (failed tool calls, guardrail blocks) in [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el).
+With these dependencies, Amazon Bedrock AgentCore automatically instruments Strands Agents, capturing invocation logs, tool call traces (which Lambda was called, input/output, latency), and error tracking (failed tool calls, guardrail blocks) in [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el).
 
 See the [observability getting started guide](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/observability-get-started.html?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for details.
 
@@ -369,7 +369,7 @@ See the [observability getting started guide](https://docs.aws.amazon.com/bedroc
 
 ## Latency Benchmarks
 
-Tool latency matters in production agents — every tool call adds to the end-to-end response time. These benchmarks measure real [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) execution duration (from [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) REPORT lines), not CLI round-trip time.
+Tool latency matters in production agents: every tool call adds to the end-to-end response time. These benchmarks measure real [AWS Lambda](https://aws.amazon.com/lambda/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) execution duration (from [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) REPORT lines), not CLI round-trip time.
 
 ### DynamoDB-backed tools
 
@@ -382,7 +382,7 @@ Tool latency matters in production agents — every tool call adds to the end-to
 
 - **Warm invocations are fast:** [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) single-digit-ms reads translate to **10-30 ms** Lambda execution for steering rule validation
 - **Cold starts are predictable:** ~450-540 ms Init + ~110 ms execution = ~600 ms total, only on first invocation after idle period
-- **Why this matters for steering:** The `validate_booking_rules` tool runs before every booking action. At ~25 ms warm, it adds negligible latency while preventing hallucinated bookings that violate business rules — a worthwhile trade-off vs. fixing bad bookings after the fact
+- **Why this matters for steering:** The `validate_booking_rules` tool runs before every booking action. At ~25 ms warm, it adds negligible latency while preventing hallucinated bookings that violate business rules, a worthwhile trade-off vs. fixing bad bookings after the fact
 
 ### Neo4j AuraDB (GraphRAG)
 
@@ -390,7 +390,7 @@ Tool latency matters in production agents — every tool call adds to the end-to
 |----------|:----------:|:--------:|:--------:|:-----------:|
 | `query_knowledge_graph` | ~1.9-2.0 s | ~13 ms | ~75 ms | 122 MB / 256 MB |
 
-[Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/) runs outside your VPC, but the [neo4j Python driver](https://neo4j.com/docs/python-manual/current/) reuses TCP connections across warm invocations. After the first call resolves credentials from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) and establishes the connection, subsequent [Cypher](https://neo4j.com/docs/cypher-manual/current/) queries execute in **11-30 ms** — comparable to [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el). Cold starts are higher (~2s) due to the neo4j driver initialization + TLS handshake + Secrets Manager lookups.
+[Neo4j AuraDB Free](https://neo4j.com/cloud/aura-free/) runs outside your VPC, but the [neo4j Python driver](https://neo4j.com/docs/python-manual/current/) reuses TCP connections across warm invocations. After the first call resolves credentials from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) and establishes the connection, subsequent [Cypher](https://neo4j.com/docs/cypher-manual/current/) queries execute in **11-30 ms**, comparable to [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el). Cold starts are higher (~2s) due to the neo4j driver initialization + TLS handshake + Secrets Manager lookups.
 
 ### Comparison: DynamoDB vs Neo4j AuraDB
 
@@ -433,7 +433,7 @@ INCLUDE_GRAPHRAG=1 cdk destroy GraphRAGStack
 
 ### What is Amazon Bedrock AgentCore and how does it work?
 
-Amazon Bedrock AgentCore is an AWS managed service for hosting AI agents in production. It provides a Runtime (agent hosting with auto-scaling) and a Gateway (MCP-based semantic routing to tools). The agent connects to the Gateway via MCP, which discovers and routes tool calls to Lambda functions — no custom routing code needed.
+Amazon Bedrock AgentCore is an AWS managed service for hosting AI agents in production. It provides a Runtime (agent hosting with auto-scaling) and a Gateway (MCP-based semantic routing to tools). The agent connects to the Gateway via MCP, which discovers and routes tool calls to Lambda functions, so no custom routing code is needed.
 
 ### How much does this deployment cost?
 
@@ -441,7 +441,7 @@ The booking agent stack uses pay-per-use AWS services: DynamoDB on-demand (~$0 a
 
 ### Can I use a different LLM provider instead of OpenAI?
 
-Yes. Change the model in `booking_agent.py` to use any provider supported by Strands Agents: Amazon Bedrock (Claude, Titan), Anthropic API, Ollama (local models), or any OpenAI-compatible endpoint. The tools and infrastructure remain the same — only the LLM provider changes.
+Yes. Change the model in `booking_agent.py` to use any provider supported by Strands Agents: Amazon Bedrock (Claude, Titan), Anthropic API, Ollama (local models), or any OpenAI-compatible endpoint. The tools and infrastructure remain the same; only the LLM provider changes.
 
 This demo uses Strands Agents for the agent framework. The production patterns demonstrated (DynamoDB-backed steering rules, Lambda tool functions, MCP routing) are applicable with other agent frameworks that support Amazon Bedrock AgentCore Runtime.
 

@@ -14,22 +14,31 @@
 ## Research Background
 
 Based on recent papers:
-- [RAG-KG-IL: Multi-Agent Hybrid Framework for Reducing Hallucinations](https://arxiv.org/pdf/2503.13514) — KG reduces hallucinations by 73% vs standalone LLMs
-- [MetaRAG: Metamorphic Testing for Hallucination Detection](https://arxiv.org/pdf/2509.09360) — Proves hallucinations are inherent to LLMs
-- [RAKG: Document-level Retrieval Augmented Knowledge Graph Construction](https://arxiv.org/pdf/2504.09823v1) — Automated KG construction from text
+- [RAG-KG-IL: Multi-Agent Hybrid Framework for Reducing Hallucinations](https://arxiv.org/pdf/2503.13514): KG reduces hallucinations by 73% vs standalone LLMs
+- [MetaRAG: Metamorphic Testing for Hallucination Detection](https://arxiv.org/pdf/2509.09360): proves hallucinations are inherent to LLMs
+- [RAKG: Document-level Retrieval Augmented Knowledge Graph Construction](https://arxiv.org/pdf/2504.09823v1): automated KG construction from text
+
+## Graph-RAG vs. Standard RAG: Why It Matters for Hallucinations
+
+| Approach | Hallucination Risk | Retrieval Method | Best For |
+|---|---|---|---|
+| Standard RAG (vector) | High, because it returns similar content even when it is irrelevant | Cosine similarity | General Q&A |
+| Graph-RAG (Neo4j) | Lower, because answers are grounded in entity relationships | Graph traversal + Cypher | Structured domains (hotels, products, finance) |
+
+> **Key insight:** Vector search always returns *something similar*, even when the answer doesn't exist in the database, and that is where fabrication starts. Graph-RAG returns only what's explicitly connected in the knowledge graph.
 
 ## 🎯 What This Demo Shows
 
 Research ([RAG-KG-IL, 2025](https://arxiv.org/pdf/2503.13514)) identifies three types of RAG hallucinations:
 
-1. **Fabricated statistics** — LLM generates plausible-sounding numbers from text chunks instead of computing them (paper shows 73% more hallucinations without KG)
-2. **Incomplete retrieval** — Vector search returns top-k documents, missing data scattered across hundreds of documents (paper found 54 instances of missing information with RAG-only)
-3. **Out-of-domain fabrication** — When no relevant data exists, RAG returns similar-looking results and the LLM fabricates an answer ([MetaRAG](https://arxiv.org/pdf/2509.09360))
+1. **Fabricated statistics**: the LLM generates plausible-sounding numbers from text chunks instead of computing them (paper shows 73% more hallucinations without KG)
+2. **Incomplete retrieval**: vector search returns top-k documents, missing data scattered across hundreds of documents (paper found 54 instances of missing information with RAG-only)
+3. **Out-of-domain fabrication**: when no relevant data exists, RAG returns similar-looking results and the LLM fabricates an answer ([MetaRAG](https://arxiv.org/pdf/2509.09360))
 
 Graph-RAG solves this with:
-- **Native aggregations** — `AVG()`, `COUNT()` computed in the database, not guessed
-- **Relationship traversal** — Cypher queries follow exact paths (Hotel → Room → Amenity)
-- **Explicit failure** — Empty results when data doesn't exist, no fabrication
+- **Native aggregations**: `AVG()`, `COUNT()` computed in the database, not guessed
+- **Relationship traversal**: Cypher queries follow exact paths (Hotel → Room → Amenity)
+- **Explicit failure**: empty results when data doesn't exist, no fabrication
 
 ## 📊 Key Findings
 
@@ -44,7 +53,7 @@ Graph-RAG solves this with:
 
 ## Architecture
 
-![RAG vs Graph-RAG architecture — same 300 documents processed through FAISS vector search and Neo4j knowledge graph for comparison](images/rag-vs-graphrag-architecture-comparison.png)
+![RAG vs Graph-RAG architecture: same 300 documents processed through FAISS vector search and Neo4j knowledge graph for comparison](images/rag-vs-graphrag-architecture-comparison.png)
 
 Two agents query the same 300 hotel FAQs with different approaches:
 - **RAG Agent** → FAISS similarity search → top 3 docs → LLM summarizes
@@ -90,7 +99,7 @@ unzip hotel-faqs.zip -d data/
 
 ### 4. Build Data Stores
 
-**Option A: LITE Version (Recommended for Testing - ~10-15 minutes)**
+**Option A: LITE Version (recommended for testing, ~10-15 minutes)**
 
 Process only 30 documents (10% of dataset) for quick testing:
 
@@ -145,12 +154,12 @@ graph_agent = Agent(
 
 ### How the Knowledge Graph is Built
 
-The graph is built **automatically** using `neo4j-graphrag` — no hardcoded schema:
+The graph is built **automatically** using `neo4j-graphrag`, with no hardcoded schema:
 
 ```python
 from neo4j_graphrag.experimental.pipeline.kg_builder import SimpleKGPipeline
 
-# No entities/relations defined — LLM discovers them from text
+# No entities/relations defined; LLM discovers them from text
 kg_builder = SimpleKGPipeline(
     llm=llm,
     driver=neo4j_driver,
@@ -178,7 +187,7 @@ If you add new documents with new entity types (Restaurant, Airport, etc.), the 
 | [neo4j-graphrag](https://neo4j.com/docs/neo4j-graphrag-python/current/) | Automatic knowledge graph construction |
 | [Neo4j](https://neo4j.com) | Graph database |
 | [FAISS](https://github.com/facebookresearch/faiss) | Vector similarity search |
-| [SentenceTransformers](https://www.sbert.net/) | Text embeddings (runs locally, no API costs — swap for any embedding provider) |
+| [SentenceTransformers](https://www.sbert.net/) | Text embeddings (runs locally, no API costs; swap for any embedding provider) |
 
 
 
@@ -190,7 +199,7 @@ If you add new documents with new entity types (Restaurant, Airport, etc.), the 
 
 **API errors:** Check has valid `OPENAI_API_KEY`
 
-**Model alternatives:** All demos work with OpenAI, Anthropic, or Ollama — see [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/)
+**Model alternatives:** All demos work with OpenAI, Anthropic, or Ollama. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/)
 
 This demo uses Strands Agents. The same Graph-RAG pattern (knowledge graph + Text2Cypher) can be implemented with LangGraph, CrewAI, AutoGen, Haystack, or any framework that supports custom tool calling.
 
@@ -204,7 +213,7 @@ Research ([RAG-KG-IL, 2025](https://arxiv.org/pdf/2503.13514)) shows knowledge g
 
 ### Do I need to define a schema for the knowledge graph?
 
-No. The graph is built automatically using `neo4j-graphrag`'s `SimpleKGPipeline`. The LLM reads each document and discovers entity types (Hotel, Room, Amenity, Policy), extracts relationships, and resolves duplicates — no hardcoded schema required. New entity types are discovered automatically when you add new documents.
+No. The graph is built automatically using `neo4j-graphrag`'s `SimpleKGPipeline`. The LLM reads each document and discovers entity types (Hotel, Room, Amenity, Policy), extracts relationships, and resolves duplicates. No hardcoded schema is required. New entity types are discovered automatically when you add new documents.
 
 ### How long does it take to build the knowledge graph?
 
@@ -214,7 +223,7 @@ The lite version (30 documents) takes approximately 15 minutes. The full version
 
 ## Next Demo
 
-[Demo 02 - Semantic Tool Selection](../02-semantic-tools-demo/) — Reduce token waste and wrong tool picks with FAISS-based semantic filtering.
+[Demo 02: Semantic Tool Selection](../02-semantic-tools-demo/): reduce token waste and wrong tool picks with FAISS-based semantic filtering.
 
 ---
 

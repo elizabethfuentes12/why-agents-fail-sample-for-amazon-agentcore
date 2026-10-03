@@ -6,24 +6,13 @@
 [![Neo4j](https://img.shields.io/badge/Neo4j-Graph--RAG-4581C3.svg?style=flat&logo=neo4j)](https://neo4j.com)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-> **AI agents hallucinate statistics, pick wrong tools, ignore business rules, and claim success when operations fail.** This repository provides 6 hands-on demos — from research-backed local experiments to production deployment on AWS — showing how to detect, prevent, and self-correct these failures using Graph-RAG, semantic tool filtering, multi-agent validation, neurosymbolic guardrails, [Agent Control](https://github.com/agentcontrol/agent-control) steering, and [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production deployment.
+> **AI agents hallucinate statistics, pick wrong tools, ignore business rules, and claim success when operations fail.** This repository provides 6 hands-on demos, from research-backed local experiments to production deployment on AWS, showing how to detect, prevent, and self-correct these failures using Graph-RAG, semantic tool filtering, multi-agent validation, neurosymbolic guardrails, [Agent Control](https://github.com/agentcontrol/agent-control) steering, and [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production deployment.
 
 Built with [Strands Agents](https://strandsagents.com). Similar patterns can be applied in LangGraph, AutoGen, CrewAI, or other agent frameworks.
 
 > **Complexity note:** Demos 01-05 run locally with minimal setup. Demo 06 requires familiarity with [AWS CDK](https://aws.amazon.com/cdk/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) and core AWS services. New to CDK? Start with the [CDK Workshop](https://cdkworkshop.com/) first.
 
-![Why AI Agents Fail — 6 progressive demos from hallucination research to production deployment on AWS](images/why-ai-agents-fail-six-demos-progressive-flow.png)
-
----
-
-## Graph-RAG vs. Standard RAG: Why It Matters for Hallucinations
-
-| Approach | Hallucination Risk | Retrieval Method | Best For |
-|---|---|---|---|
-| Standard RAG (vector) | High, because it returns similar content even when it is irrelevant | Cosine similarity | General Q&A |
-| Graph-RAG (Neo4j) | Lower, because answers are grounded in entity relationships | Graph traversal + Cypher | Structured domains (hotels, products, finance) |
-
-> **Key insight:** Vector search always returns *something similar*, even when the answer doesn't exist in the database, and that is where fabrication starts. Graph-RAG returns only what's explicitly connected in the knowledge graph.
+![Why AI Agents Fail: 6 progressive demos from hallucination research to production deployment on AWS](images/why-ai-agents-fail-six-demos-progressive-flow.png)
 
 ---
 
@@ -38,9 +27,9 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 | 05 | [Agent Control Steering](./05-agent-control-demo/) | Hard-blocking stops the task instead of fixing it | Agent self-corrects instead of failing | ![Agent Control](https://img.shields.io/badge/Agent_Control-orange?style=flat) |
 | 06 | [Amazon Bedrock AgentCore Production](./06-agentcore-production-demo/) | Taking all techniques to production on AWS | Full deployment with CDK, Lambda, DynamoDB, Amazon Bedrock AgentCore | ![AWS CDK](https://img.shields.io/badge/CDK-v2-FF9900?style=flat&logo=amazon-aws) ![DynamoDB](https://img.shields.io/badge/DynamoDB-4053D6?style=flat&logo=amazon-dynamodb) ![Lambda](https://img.shields.io/badge/Lambda-FF9900?style=flat&logo=aws-lambda) |
 
-### Demo 06 — Production Architecture
+### Demo 06: Production Architecture
 
-![Demo 06 Production Architecture — Amazon Bedrock AgentCore with Lambda, DynamoDB, Graph-RAG, and steering rules](./06-agentcore-production-demo/images/architecture.svg)
+![Demo 06 Production Architecture: Amazon Bedrock AgentCore with Lambda, DynamoDB, Graph-RAG, and steering rules](./06-agentcore-production-demo/images/architecture.svg)
 
 ---
 
@@ -48,11 +37,11 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 
 Each demo builds on the previous one. You can run any demo independently, but the learning path is designed to be progressive:
 
-**Phase 1 — Understand Failures:** Demos 01-02 show *why* agents fail — RAG hallucinations and tool selection errors backed by academic research.
+**Phase 1, Understand Failures:** Demos 01-02 show *why* agents fail: RAG hallucinations and tool selection errors backed by academic research.
 
-**Phase 2 — Detect & Prevent:** Demos 03-04 show *how to catch* failures — multi-agent validation and symbolic rule enforcement.
+**Phase 2, Detect and Prevent:** Demos 03-04 show *how to catch* failures: multi-agent validation and symbolic rule enforcement.
 
-**Phase 3 — Self-Correct & Deploy:** Demo 05 shows *how to steer* agents to self-correct instead of blocking (Agent Control), and Demo 06 shows *how to ship* all techniques to production on AWS (Amazon Bedrock AgentCore, DynamoDB, Lambda).
+**Phase 3, Self-Correct and Deploy:** Demo 05 shows *how to steer* agents to self-correct instead of blocking (Agent Control), and Demo 06 shows *how to ship* all techniques to production on AWS (Amazon Bedrock AgentCore, DynamoDB, Lambda).
 
 ---
 
@@ -101,7 +90,7 @@ Demo 01 needs a Neo4j instance to build and query the knowledge graph. Pick one 
 1. Create a free **AuraDB** instance at [console.neo4j.io](https://console.neo4j.io) and download the credentials.
 2. Use the `neo4j+s://...` URI they give you in your `.env`.
 
-**See the graph:** open **Neo4j Browser** at `http://localhost:7474` (or the Aura "Query" tab), then run the queries from the end of `test_graphrag.ipynb` — the `RETURN p` queries draw the graph visually.
+**See the graph:** open **Neo4j Browser** at `http://localhost:7474` (or the Aura "Query" tab), then run the queries from the end of `test_graphrag.ipynb`. The `RETURN p` queries draw the graph visually.
 
 ---
 
@@ -109,7 +98,7 @@ Demo 01 needs a Neo4j instance to build and query the knowledge graph. Pick one 
 
 ### What types of AI agent hallucinations does this repository address?
 
-This repository addresses four main categories: **(1)** fabricated statistics — when RAG agents guess numbers instead of computing them, **(2)** wrong tool selection — when agents pick inappropriate tools from large toolsets, **(3)** business rule violations — when agents ignore constraints expressed only in prompts, and **(4)** undetected failures — when single agents claim success without validation.
+This repository addresses four main categories: **(1)** fabricated statistics, when RAG agents guess numbers instead of computing them; **(2)** wrong tool selection, when agents pick inappropriate tools from large toolsets; **(3)** business rule violations, when agents ignore constraints expressed only in prompts; and **(4)** undetected failures, when single agents claim success without validation.
 
 ### Can I use these patterns with frameworks other than Strands Agents?
 
@@ -149,7 +138,7 @@ For demo-specific issues, check the troubleshooting section in each demo's READM
 2. *RAG-KG-IL: A Multi-Agent Hybrid Framework for Reducing Hallucinations and Enhancing LLM Reasoning.* [arXiv:2503.13514](https://arxiv.org/abs/2503.13514)
 3. *MetaRAG: Metamorphic Testing for Hallucination Detection in RAG Systems.* [arXiv:2509.09360](https://arxiv.org/abs/2509.09360)
 4. *RAKG: Document-level Retrieval Augmented Knowledge Graph Construction.* [arXiv:2504.09823](https://arxiv.org/abs/2504.09823v1)
-5. [Strands Agents Documentation](https://strandsagents.com) — agent framework used across all demos.
+5. [Strands Agents Documentation](https://strandsagents.com): agent framework used across all demos.
 
 ---
 

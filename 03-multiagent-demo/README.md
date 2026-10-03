@@ -166,11 +166,11 @@ The `test_multiagent_hallucinations.ipynb` notebook includes:
 
 ## Troubleshooting
 
-**OpenTelemetry warnings**: Ignore "Failed to detach context" warnings - they don't affect functionality
+**OpenTelemetry warnings**: Ignore "Failed to detach context" warnings. They do not affect functionality
 
 **OpenAI API errors**: Ensure `OPENAI_API_KEY` is set in your environment or `.env` file. Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-**Graph-RAG tests skipped**: Optional - requires Neo4j setup. Core tests work without it.
+**Graph-RAG tests skipped**: Optional, requires Neo4j setup. Core tests work without it.
 
 ## References
 

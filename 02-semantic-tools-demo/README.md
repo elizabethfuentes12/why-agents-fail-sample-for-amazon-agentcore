@@ -16,11 +16,11 @@ Based on research: ["Internal Representations as Indicators of Hallucinations in
 
 Research ([Internal Representations, 2025](https://arxiv.org/abs/2601.05214)) identifies 5 critical agent failure modes when tools scale:
 
-1. **Function selection errors** - Calling non-existent tools
-2. **Function appropriateness errors** - Choosing semantically wrong tools
-3. **Parameter errors** - Malformed or invalid arguments
-4. **Completeness errors** - Missing required parameters
-5. **Tool bypass behavior** - Generating outputs instead of calling tools
+1. **Function selection errors**: Calling non-existent tools
+2. **Function appropriateness errors**: Choosing semantically wrong tools
+3. **Parameter errors**: Malformed or invalid arguments
+4. **Completeness errors**: Missing required parameters
+5. **Tool bypass behavior**: Generating outputs instead of calling tools
 
 **The dual problem**:
 - ❌ **Hallucination risk**: More tools = more inappropriate selections
@@ -53,7 +53,7 @@ swap_tools(agent, new_tools)  # agent.messages preserved
 
 **3. Runtime Tool Discovery**
 - Agent picks up tool changes automatically at each event loop
-- No manual refresh needed—just modify `tool_registry`
+- No manual refresh needed; just modify `tool_registry`
 - Zero-downtime tool updates in production
 
 Traditional frameworks require agent recreation to change tools, losing conversation state. Strands maintains memory while tools change dynamically.
@@ -65,14 +65,14 @@ Learn more: [Strands Tool Registry](https://strandsagents.com/docs/user-guide/co
 ### Prerequisites
 
 - Python 3.9+
-- [Strands Agents](https://strandsagents.com) — AI agent framework
+- [Strands Agents](https://strandsagents.com): AI agent framework
 - Optional: Neo4j connection for real hotel data (from `../01-hotel-rag-demo`)
 
 ### Model
 
 This demo uses OpenAI with GPT-4o-mini by default (requires `OPENAI_API_KEY` environment variable).
 
-You can swap the model for any provider supported by Strands — Amazon Bedrock, Anthropic, Ollama, etc. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
+You can swap the model for any provider supported by Strands, such as Amazon Bedrock, Anthropic, or Ollama. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
 
 ### Configure Environment Variables
 
@@ -134,7 +134,7 @@ uv run token_comparison_app.py
 
 **Expected output**:
 
-![Token reduction comparison — traditional vs semantic vs memory](images/semantic-tools-demo-tokens-reduction.png)
+![Token reduction comparison: traditional vs semantic vs memory](images/semantic-tools-demo-tokens-reduction.png)
 
 ![Accuracy and token cost comparison charts](images/semantic-tool-selection-results.png)
 
@@ -242,14 +242,14 @@ No. Strands Agents' `swap_tools()` function changes the available tools at runti
 
 ### Can I use semantic tool selection with other agent frameworks?
 
-Yes. The core pattern — embedding tool descriptions with FAISS and filtering by cosine similarity before the LLM sees them — is framework-agnostic. You can implement it in LangGraph, CrewAI, AutoGen, or any framework. Amazon Bedrock AgentCore Gateway also provides built-in [MCP semantic routing](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production workloads.
+Yes. The core pattern, embedding tool descriptions with FAISS and filtering by cosine similarity before the LLM sees them, is framework-agnostic. You can implement it in LangGraph, CrewAI, AutoGen, or any framework. Amazon Bedrock AgentCore Gateway also provides built-in [MCP semantic routing](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production workloads.
 
 ---
 
 ## Navigation
 
 - **Previous:** [Demo 01 - Graph-RAG vs RAG](../01-faq-graphrag-demo/)
-- **Next:** [Demo 03 - Multi-Agent Validation](../03-multiagent-demo/) — Cross-validate tool selections with Executor → Validator → Critic
+- **Next:** [Demo 03 - Multi-Agent Validation](../03-multiagent-demo/): cross-validate tool selections with Executor → Validator → Critic
 
 ---
 
