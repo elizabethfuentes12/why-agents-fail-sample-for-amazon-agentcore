@@ -66,3 +66,7 @@ generated-diagrams/
 
 # Private beta testing files
 invoke.py
+07-context-graph-integration/
+artifacts/
+test_nova_embeddings.py
+Elizabeth
