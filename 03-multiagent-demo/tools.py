@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """
 Travel booking tools for multi-agent validation demo
 """
@@ -5,9 +7,9 @@ from strands import tool
 
 # Simulated database
 HOTELS = {
-    "grand_hotel": {"price": 200, "available": True, "max_guests": 4},
-    "budget_inn": {"price": 80, "available": True, "max_guests": 2},
-    "luxury_resort": {"price": 500, "available": False, "max_guests": 6},
+    "anycompany_lisbon": {"name": "AnyCompany Lisbon Resort", "price": 95, "max_guests": 4, "available": True},
+    "anycompany_paris": {"name": "AnyCompany Paris City Hotel", "price": 110, "max_guests": 3, "available": True},
+    "anycompany_rome": {"name": "AnyCompany Rome City Hotel", "price": 115, "max_guests": 2, "available": False},
 }
 
 BOOKINGS = {}

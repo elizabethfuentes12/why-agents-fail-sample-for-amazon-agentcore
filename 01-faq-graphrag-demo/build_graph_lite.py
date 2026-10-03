@@ -1,11 +1,23 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """
-Build LITE knowledge graph from hotel FAQ documents using neo4j-graphrag.
+Build the LITE Neo4j knowledge graph from hotel FAQ documents.
 
-LITE VERSION: Processes only 30 documents (10% of full dataset) for faster testing.
-Full version takes ~2 hours, lite version takes ~10-15 minutes.
+How this script works
+---------------------
+Same SimpleKGPipeline flow as build_graph.py (load -> chunk -> embed -> LLM
+entity/relationship extraction -> write to Neo4j), but only the first 30
+documents (10% of the dataset) so a full build takes ~10-15 min instead of
+~2 hours. No fixed schema is passed, so the LLM auto-discovers labels,
+relationship types and property names from the text. Pair this with
+load_vector_data_lite.py for a fair RAG-vs-Graph-RAG comparison on the same
+30 documents.
+
+Neo4j best practice: sessions target an explicit database (NEO4J_DATABASE).
 """
 import os
 import asyncio
+import atexit
 os.environ['OTEL_SDK_DISABLED'] = 'true'
 
 from dotenv import load_dotenv
@@ -19,6 +31,25 @@ from neo4j_graphrag.embeddings import OpenAIEmbeddings
 NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://127.0.0.1:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+
+# Single Neo4j driver reused across clear/build/summary, closed once at exit.
+_driver = None
+
+
+def _get_driver():
+    global _driver
+    if _driver is None:
+        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    return _driver
+
+
+@atexit.register
+def _close_driver():
+    global _driver
+    if _driver is not None:
+        _driver.close()
+        _driver = None
 
 # LITE: Process only first 30 documents
 MAX_DOCS = 30
@@ -27,10 +58,9 @@ MAX_DOCS = 30
 async def build_graph():
     # Clear existing graph
     print("Clearing existing graph...")
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-    with driver.session() as session:
+    driver = _get_driver()
+    with driver.session(database=NEO4J_DATABASE) as session:
         session.run("MATCH (n) DETACH DELETE n")
-    driver.close()
     print("✅ Graph cleared\n")
 
     # LLM and embedder
@@ -44,7 +74,7 @@ async def build_graph():
     # eliminating the need to manually define entity types in advance
     kg_builder = SimpleKGPipeline(
         llm=llm,
-        driver=GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)),
+        driver=_get_driver(),
         embedder=embedder,
         from_pdf=False,
         perform_entity_resolution=True,
@@ -69,14 +99,15 @@ async def build_graph():
             print(f"  ❌ Error: {e}")
             errors += 1
     
-    await kg_builder.close()
+    # Note: do not close kg_builder here — it shares the single driver,
+    # which is closed once at process exit via _close_driver().
 
     print(f"\n{'='*60}")
     print(f"LITE GRAPH BUILD COMPLETE ({total - errors}/{total} docs processed)")
     print(f"{'='*60}")
 
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-    with driver.session() as session:
+    driver = _get_driver()
+    with driver.session(database=NEO4J_DATABASE) as session:
         result = session.run("""
             MATCH (n) 
             WHERE NOT 'Chunk' IN labels(n) AND NOT 'Document' IN labels(n)
@@ -110,7 +141,6 @@ async def build_graph():
         for r in result:
             print(f"  {r['hotel']} -> {r['country']}")
 
-    driver.close()
     print("\n✅ LITE graph ready for queries!")
 
 

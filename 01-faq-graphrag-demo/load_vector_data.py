@@ -1,3 +1,20 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+"""
+Build the FAISS vector store for Traditional RAG (full dataset).
+
+How this script works
+---------------------
+1. Reads every hotel FAQ .txt file under data/.
+2. Embeds each document locally with SentenceTransformer ('all-MiniLM-L6-v2') —
+   no API key or cost, 384-dimension vectors.
+3. Builds a FAISS IndexFlatL2 (exact L2 similarity) and writes it to
+   faqs_vector.index, with the raw documents saved to faqs_docs.json.
+
+The agent's search_faqs tool later reads this index to do top-k similarity
+search. This is the "RAG" side of the Graph-RAG comparison; build_graph.py
+builds the Neo4j graph for the "Graph-RAG" side from the SAME documents.
+"""
 import faiss
 import json
 from pathlib import Path

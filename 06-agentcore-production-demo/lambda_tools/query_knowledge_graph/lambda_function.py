@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Lambda: query_knowledge_graph — executes Cypher queries against Neo4j AuraDB."""
 
 import json

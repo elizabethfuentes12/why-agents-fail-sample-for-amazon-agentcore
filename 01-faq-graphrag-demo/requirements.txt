@@ -1,4 +1,4 @@
-strands-agents[openai]>=1.27.0
+strands-agents[openai]>=1.56.0
 neo4j>=5.28.0
 neo4j-graphrag[openai]>=1.13.0
 faiss-cpu>=1.9.0

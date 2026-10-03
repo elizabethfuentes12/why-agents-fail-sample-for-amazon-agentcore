@@ -8,7 +8,7 @@
 > Combines LLM flexibility with symbolic rules for verifiable, constrained decision-making in AI agents.
 
 
-![Diagram showing LLM flexibility combined with symbolic rule enforcement](images/neurosymbolic.png)
+![Two bands over the same 10-guest limit. Written in the system prompt, nothing checks the call, book_hotel(guests=15) runs, and the tool returns a success so the rule breaks without a signal. Written in a BeforeToolCallEvent hook as the pure function guests <= 10, event.cancel_tool stops book_hotel before the function is entered and the agent reads BLOCKED: Maximum 10 guests per booking as the tool result](images/neurosymbolic.png)
 
 
 ## The Problem
@@ -30,19 +30,19 @@ Neurosymbolic integration combines:
 
 **Flow:** User Query **>** LLM (understands) **>** Tool Selection **>** Hook (validates) **>** Execute or Block
 
-**Strands Agents makes this simple**: Just create a hook, define your rules, and attach it to your agent. The framework handles the rest.
+**Strands Agents provides a clean API for this**: Create a hook, define your rules, and attach it to your agent. The framework handles the rest.
 
 ## Quick Start
 
 ### Prerequisites
 - Python 3.9+
-- [Strands Agents](https://strandsagents.com) — AI agent framework
+- [Strands Agents](https://strandsagents.com): AI agent framework
 
 ### Model
 
 This demo uses OpenAI with GPT-4o-mini by default (requires `OPENAI_API_KEY` environment variable).
 
-You can swap the model for any provider supported by Strands — Amazon Bedrock, Anthropic, Ollama, etc. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
+You can swap the model for any provider supported by Strands: Amazon Bedrock, Anthropic, Ollama, and others. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
 
 ### Setup
 
@@ -109,7 +109,7 @@ The agent uses the LLM to understand "Confirm booking BK001 for me", but the hoo
 
 ## Why Strands Hooks?
 
-✅ **Simple API**: Just implement `HookProvider` and register callbacks  
+✅ **Minimal API**: Implement `HookProvider` and register callbacks  
 ✅ **Centralized validation**: One hook validates all tools  
 ✅ **Clean tools**: No validation logic mixed with business logic  
 ✅ **Type-safe**: Strongly-typed event objects  
@@ -119,9 +119,9 @@ The agent uses the LLM to understand "Confirm booking BK001 for me", but the hoo
 
 | Approach | Enforcement | Bypassable? | Maintainability |
 |----------|------------|:-----------:|-----------------|
-| **Prompt engineering** | Instructions in system prompt | Yes — LLM can ignore text | Rules mixed with instructions |
-| **Tool docstrings** | Constraints in tool descriptions | Yes — processed as text, not code | Scattered across tools |
-| **Neurosymbolic hooks** | Python lambdas executed before tool calls | No — code runs regardless of LLM output | Centralized in `rules.py` |
+| **Prompt engineering** | Instructions in system prompt | Yes, the LLM can ignore text | Rules mixed with instructions |
+| **Tool docstrings** | Constraints in tool descriptions | Yes, processed as text and not code | Scattered across tools |
+| **Neurosymbolic hooks** | Python lambdas executed before tool calls | No, the code runs regardless of LLM output | Centralized in `rules.py` |
 
 The key insight: prompts are suggestions, but code is enforcement. Hooks intercept tool calls *before* execution and validate parameters against symbolic rules that the LLM cannot bypass.
 
@@ -129,7 +129,7 @@ The key insight: prompts are suggestions, but code is enforcement. Hooks interce
 
 ### What is neurosymbolic AI in the context of agent guardrails?
 
-Neurosymbolic AI combines neural networks (the LLM that understands natural language and selects tools) with symbolic reasoning (executable Python rules that validate constraints). In this demo, the LLM handles user intent while symbolic rules in `rules.py` enforce business logic like maximum guest limits, valid date ranges, and payment prerequisites — creating verifiable, deterministic guardrails.
+Neurosymbolic AI combines neural networks (the LLM that understands natural language and selects tools) with symbolic reasoning (executable Python rules that validate constraints). In this demo, the LLM handles user intent while symbolic rules in `rules.py` enforce business logic like maximum guest limits, valid date ranges, and payment prerequisites, creating verifiable, deterministic guardrails.
 
 ### Why not put business rules in the prompt or tool docstrings?
 
@@ -137,7 +137,7 @@ Research ([ATA: Autonomous Trustworthy Agents, 2024](https://arxiv.org/html/2510
 
 ### Can I use this pattern with other agent frameworks?
 
-Yes. Any framework that supports lifecycle hooks or middleware (LangGraph callbacks, CrewAI task hooks, AutoGen function wrappers) can implement the same neurosymbolic pattern. The core idea — intercept tool calls and validate parameters against symbolic rules — is framework-agnostic.
+Yes. Any framework that supports lifecycle hooks or middleware can implement the same neurosymbolic pattern. The core idea, intercepting tool calls and validating parameters against symbolic rules, is framework-agnostic.
 
 ## References
 
@@ -150,7 +150,7 @@ Yes. Any framework that supports lifecycle hooks or middleware (LangGraph callba
 ## Navigation
 
 - **Previous:** [Demo 03 - Multi-Agent Validation](../03-multiagent-demo/)
-- **Next:** [Demo 05 - Agent Control Steering](../05-agent-control-demo/) — Self-correct instead of blocking
+- **Next:** [Demo 05 - Agent Control Steering](../05-steering-demo/): self-correct instead of blocking
 
 ---
 

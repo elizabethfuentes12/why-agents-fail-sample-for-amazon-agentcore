@@ -1,0 +1,18 @@
+direction: right
+
+classes: {
+  agent: { style: { fill: "#eef2ff"; stroke: "#4f46e5"; stroke-width: 2; font-color: "#312e81"; border-radius: 12; bold: true } }
+  endpoint: { style: { fill: "#f1f5f9"; stroke: "#64748b"; stroke-width: 2; font-color: "#334155"; border-radius: 12 } }
+}
+
+req: User Request { class: endpoint }
+exec: Executor\n\nUses tools { class: agent }
+val: Validator\n\nVerifies output { class: agent }
+crit: Critic\n\nApproves / Rejects { class: agent }
+resp: Final Response { class: endpoint }
+
+req -> exec: { style.stroke: "#4f46e5" }
+exec -> val: { style.stroke: "#4f46e5" }
+val -> crit: { style.stroke: "#4f46e5" }
+crit -> resp: approved { style.stroke: "#16a34a" }
+crit -> exec: rejected → retry { style: { stroke: "#dc2626"; stroke-dash: 4 } }

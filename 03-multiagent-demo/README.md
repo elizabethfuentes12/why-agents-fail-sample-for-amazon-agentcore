@@ -6,7 +6,7 @@
 [![Strands Agents](https://img.shields.io/badge/Strands_Agents-1.27+-00B4D8.svg?style=flat)](https://strandsagents.com)
 [![Swarm](https://img.shields.io/badge/Pattern-Executor→Validator→Critic-green.svg?style=flat)](https://strandsagents.com/docs/user-guide/concepts/multi-agent/swarm/)
 
-> Single agents hallucinate without detection—they claim success when operations fail and fabricate responses. Multi-agent validation with Executor → Validator → Critic pattern catches these errors through cross-validation. We'll build a travel booking system with Strands Agents Swarm that detects invalid hotels and returns explicit FAILED status instead of hallucinating alternatives.
+> Single agents hallucinate without detection: they claim success when operations fail and fabricate responses. Multi-agent validation catches these errors through cross-validation using an **Executor → Validator → Critic** pipeline (three specialized agents where each one checks the previous agent's output). This demo builds a travel booking system with Strands Agents Swarm that detects invalid hotels and returns explicit FAILED status instead of hallucinating alternatives.
 
 Based on research: [Teaming LLMs to Detect and Mitigate Hallucinations](https://arxiv.org/pdf/2510.19507)
 
@@ -25,18 +25,19 @@ Single agents operate in isolation. When they hallucinate, there's no mechanism 
 
 Multiple specialized agents that validate each other, enhanced with Graph-RAG:
 
-![Diagram showing executor, validator, and critic agents in validation pipeline](images/single-vs-multi-agent-accuracy.png)
+![Two bands over the same booking request. A single agent does everything, nobody else checks the answer, and a confirmed booking at AnyCompany Antarctica reaches the user even though that hotel does not exist. The swarm splits the work across an Executor that holds the only tools, a Validator with no tools that compares the answer against the original request, and a Critic that returns APPROVED, SUSPICIOUS or INVALID, at the cost of 3 LLM calls instead of 1](images/single-vs-multi-agent-accuracy.png)
+
 ## Quick Start
 
 ### Prerequisites
 - Python 3.9+
-- [Strands Agents](https://strandsagents.com) — AI agent framework
+- [Strands Agents](https://strandsagents.com): AI agent framework
 
 ### Model
 
 This demo uses OpenAI with GPT-4o-mini by default (requires `OPENAI_API_KEY` environment variable).
 
-You can swap the model for any provider supported by Strands — Amazon Bedrock, Anthropic, Ollama, etc. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
+You can swap the model for any provider supported by Strands: Amazon Bedrock, Anthropic, Ollama, and others. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
 
 ### Setup
 ```bash
@@ -65,10 +66,10 @@ The tests include:
 
 ```
 [TEST 1] Single Agent - Valid Booking
-✓ Response: I've booked the grand_hotel for John for 2 nights...
+✓ Response: I've booked the anycompany_lisbon for John for 2 nights...
 
-[TEST 2] Single Agent - Invalid Hotel (the_ritz_paris doesn't exist)
-⚠️  Response: I've booked the grand_hotel in Paris for Sarah...
+[TEST 2] Single Agent - Invalid Hotel (anycompany_antarctica doesn't exist)
+⚠️  Response: I've booked the anycompany_lisbon in Paris for Sarah...
     (Agent hallucinated - changed hotel without warning!)
 
 [TEST 3] Multi-Agent - Valid Booking with Validation
@@ -83,7 +84,7 @@ The tests include:
 
 ## How It Works
 
-**Strands Agents makes this simple**: define what each agent does, and `Swarm` handles all coordination — autonomous handoffs, shared context, explicit `COMPLETED`/`FAILED` status — with no custom orchestration code.
+**Strands Agents handles the coordination**: you define what each agent does, and `Swarm` provides autonomous handoffs, shared context, and explicit `COMPLETED`/`FAILED` status, with no custom orchestration code.
 
 ### Basic Multi-Agent
 ```python
@@ -102,7 +103,7 @@ critic = Agent(name="critic",
 
 # Create swarm - agents hand off to each other
 swarm = Swarm([executor, validator, critic], entry_point=executor)
-result = swarm("Book grand_hotel for John")
+result = swarm("Book anycompany_lisbon for John")
 ```
 
 ### Enhanced with Graph-RAG
@@ -158,7 +159,7 @@ The `test_multiagent_hallucinations.ipynb` notebook includes:
 
 ## Key Findings
 
-1. **Single agents hallucinate**: Changed `the_ritz_paris` to `grand_hotel` without warning
+1. **Single agents hallucinate**: Changed `anycompany_antarctica` to `anycompany_lisbon` without warning
 2. **Multi-agent validation works**: Detected invalid hotel, returned FAILED status
 3. **Executor → Validator → Critic pattern**: Provides audit trail and cross-validation
 4. **Status tracking**: COMPLETED/FAILED makes errors explicit
@@ -167,7 +168,7 @@ The `test_multiagent_hallucinations.ipynb` notebook includes:
 
 **OpenTelemetry warnings**: Ignore "Failed to detach context" warnings - they don't affect functionality
 
-**AWS credentials**: Ensure credentials are configured with Amazon Bedrock access
+**OpenAI API errors**: Ensure `OPENAI_API_KEY` is set in your environment or `.env` file. Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
 **Graph-RAG tests skipped**: Optional - requires Neo4j setup. Core tests work without it.
 
@@ -185,7 +186,7 @@ The `test_multiagent_hallucinations.ipynb` notebook includes:
 
 ### How does multi-agent validation detect hallucinations that single agents miss?
 
-Single agents operate in isolation — when they hallucinate, there is no mechanism to detect the error. Multi-agent validation uses an Executor-Validator-Critic pipeline where each agent cross-checks the previous one's output. The Validator verifies tool calls against ground truth, and the Critic provides a final pass/fail verdict with explicit COMPLETED or FAILED status.
+Single agents operate in isolation. When they hallucinate, there is no mechanism to detect the error. Multi-agent validation uses an Executor-Validator-Critic pipeline where each agent cross-checks the previous one's output. The Validator verifies tool calls against ground truth, and the Critic provides a final pass/fail verdict with explicit COMPLETED or FAILED status.
 
 ### What happens when the multi-agent swarm detects a hallucination?
 
@@ -195,14 +196,14 @@ The swarm returns a `Status.FAILED` result with an explanation of what went wron
 
 Yes, multi-agent validation adds latency because multiple LLM calls are needed (Executor + Validator + Critic). However, the tradeoff is significantly higher accuracy and an audit trail of cross-validation. For production use, [Demo 06](../06-agentcore-production-demo/) shows how to achieve similar validation with a single `validate_booking_rules` tool backed by DynamoDB for lower latency.
 
-This demo uses Strands Agents Swarm. Similar multi-agent patterns can be implemented in LangGraph, CrewAI, AutoGen, or any framework that supports agent-to-agent handoffs.
+This demo uses Strands Agents Swarm. Similar multi-agent patterns can be implemented in any framework that supports agent-to-agent handoffs.
 
 ---
 
 ## Navigation
 
 - **Previous:** [Demo 02 - Semantic Tool Selection](../02-semantic-tools-demo/)
-- **Next:** [Demo 04 - Neurosymbolic Guardrails](../04-neurosymbolic-demo/) — Enforce business rules the LLM cannot bypass
+- **Next:** [Demo 04 - Neurosymbolic Guardrails](../04-neurosymbolic-demo/): enforce business rules the LLM cannot bypass
 
 ---
 

@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Lambda: book_hotel — creates a PENDING reservation in DynamoDB."""
 
 import json

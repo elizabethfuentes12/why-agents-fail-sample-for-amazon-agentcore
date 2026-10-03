@@ -1,0 +1,37 @@
+direction: right
+classes: {
+  bad:      { style: { fill: "#fef2f2"; stroke: "#dc2626"; stroke-width: 2; font-color: "#7f1d1d"; border-radius: 12 } }
+  good:     { style: { fill: "#f0fdf4"; stroke: "#16a34a"; stroke-width: 2; font-color: "#14532d"; border-radius: 12 } }
+  hdr-bad:  { style: { fill: "#dc2626"; stroke: "#dc2626"; font-color: "#ffffff"; bold: true; border-radius: 8 } }
+  hdr-good: { style: { fill: "#16a34a"; stroke: "#16a34a"; font-color: "#ffffff"; bold: true; border-radius: 8 } }
+}
+
+hooks: "" {
+  class: bad
+  h: Hooks (Block) { class: hdr-bad }
+  body: |md
+    **book_hotel(guests=15)** → ✗ BLOCKED: exceeds max 10
+
+    Agent reports failure → ✗ "Would you like to adjust?"
+
+    User must respond → ✗ Flow interrupted
+
+    **Booking NOT completed** → ✗ User frustrated
+  | { width: 440; style.font-color: "#7f1d1d" }
+  h -> body: { style.stroke: "#dc2626" }
+}
+
+control: "" {
+  class: good
+  h: Agent Control (Self-Correct) { class: hdr-good }
+  body: |md
+    **book_hotel(guests=15)** → ✓ Guide("reduce to 10")
+
+    Agent retries with 10 → ✓ Automatic correction
+
+    "Adjusted to 10, BK002" → ✓ User informed
+
+    **Booking COMPLETED** → ✓ Flow uninterrupted
+  | { width: 440; style.font-color: "#14532d" }
+  h -> body: { style.stroke: "#16a34a" }
+}

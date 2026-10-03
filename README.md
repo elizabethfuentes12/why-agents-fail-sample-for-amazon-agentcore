@@ -16,6 +16,17 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 
 ---
 
+## Graph-RAG vs. Standard RAG: Why It Matters for Hallucinations
+
+| Approach | Hallucination Risk | Retrieval Method | Best For |
+|---|---|---|---|
+| Standard RAG (vector) | High, because it returns similar content even when it is irrelevant | Cosine similarity | General Q&A |
+| Graph-RAG (Neo4j) | Lower, because answers are grounded in entity relationships | Graph traversal + Cypher | Structured domains (hotels, products, finance) |
+
+> **Key insight:** Vector search always returns *something similar*, even when the answer doesn't exist in the database, and that is where fabrication starts. Graph-RAG returns only what's explicitly connected in the knowledge graph.
+
+---
+
 ## Demos
 
 | # | Demo | What It Solves | Key Result | Stack |
@@ -69,6 +80,29 @@ uv run <main_script>.py
 
 Each demo README has specific setup instructions and prerequisites.
 
+### Neo4j Setup (Demo 01)
+
+Demo 01 needs a Neo4j instance to build and query the knowledge graph. Pick one option:
+
+**Neo4j Desktop (local):**
+1. Create and **Start** a database in Neo4j Desktop; note the password.
+2. Install the **APOC** plugin (Plugins tab) and restart the database.
+3. Add the connection details to `01-faq-graphrag-demo/.env`:
+   ```
+   NEO4J_URI=bolt://127.0.0.1:7687
+   NEO4J_USER=neo4j
+   NEO4J_PASSWORD=<your-password>
+   NEO4J_DATABASE=neo4j
+   OPENAI_API_KEY=<your-openai-key>
+   ```
+4. Build the graph: `uv run build_graph_lite.py` (30 docs, ~15 min) or `build_graph.py` (300 docs, ~2 h).
+
+**Neo4j Aura (cloud, free):**
+1. Create a free **AuraDB** instance at [console.neo4j.io](https://console.neo4j.io) and download the credentials.
+2. Use the `neo4j+s://...` URI they give you in your `.env`.
+
+**See the graph:** open **Neo4j Browser** at `http://localhost:7474` (or the Aura "Query" tab), then run the queries from the end of `test_graphrag.ipynb` — the `RETURN p` queries draw the graph visually.
+
 ---
 
 ## Frequently Asked Questions
@@ -106,6 +140,16 @@ All demos default to OpenAI GPT-4o-mini but work with any provider supported by 
 **Model alternatives:** Change the model in any demo by modifying the `OpenAIModel()` constructor. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for all supported options.
 
 For demo-specific issues, check the troubleshooting section in each demo's README.
+
+---
+
+## References
+
+1. Edge et al. (2024). *From Local to Global: A Graph RAG Approach to Query-Focused Summarization.* Microsoft Research. [arXiv:2404.16130](https://arxiv.org/abs/2404.16130)
+2. *RAG-KG-IL: A Multi-Agent Hybrid Framework for Reducing Hallucinations and Enhancing LLM Reasoning.* [arXiv:2503.13514](https://arxiv.org/abs/2503.13514)
+3. *MetaRAG: Metamorphic Testing for Hallucination Detection in RAG Systems.* [arXiv:2509.09360](https://arxiv.org/abs/2509.09360)
+4. *RAKG: Document-level Retrieval Augmented Knowledge Graph Construction.* [arXiv:2504.09823](https://arxiv.org/abs/2504.09823v1)
+5. [Strands Agents Documentation](https://strandsagents.com) — agent framework used across all demos.
 
 ---
 

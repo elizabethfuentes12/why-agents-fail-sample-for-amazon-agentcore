@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Lambda: validate_booking_rules — reads steering rules from DynamoDB and evaluates them."""
 
 import json

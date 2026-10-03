@@ -1,0 +1,46 @@
+direction: right
+
+classes: {
+  bad:      { style: { fill: "#fef2f2"; stroke: "#dc2626"; stroke-width: 2; font-color: "#7f1d1d"; border-radius: 12 } }
+  good:     { style: { fill: "#f0fdf4"; stroke: "#16a34a"; stroke-width: 2; font-color: "#14532d"; border-radius: 12 } }
+  hdr-bad:  { style: { fill: "#dc2626"; stroke: "#dc2626"; font-color: "#ffffff"; bold: true; border-radius: 8 } }
+  hdr-good: { style: { fill: "#16a34a"; stroke: "#16a34a"; font-color: "#ffffff"; bold: true; border-radius: 8 } }
+}
+
+rag: "" {
+  class: bad
+  h: Agentic RAG (vector) { class: hdr-bad }
+  body: |md
+    **Multi-step reasoning**
+    ✗ Cannot aggregate
+
+    **Comparative queries**
+    ⚠ May hallucinate stats
+
+    **Exact counts**
+    ✗ Partial results only
+
+    **Out-of-domain**
+    ⚠ Returns similar results
+  | { width: 360; height: 360; style.font-color: "#7f1d1d" }
+  h -> body: { style.stroke: "#dc2626" }
+}
+
+graph: "" {
+  class: good
+  h: Agentic Graph-RAG (Neo4j) { class: hdr-good }
+  body: |md
+    **Multi-step reasoning**
+    ✓ Relationship traversal
+
+    **Comparative queries**
+    ✓ Precise aggregation
+
+    **Exact counts**
+    ✓ Complete filtering
+
+    **Out-of-domain**
+    ✓ Explicit "no data"
+  | { width: 360; height: 360; style.font-color: "#14532d" }
+  h -> body: { style.stroke: "#16a34a" }
+}

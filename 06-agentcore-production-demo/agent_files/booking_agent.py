@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Hotel Booking Agent — AgentCore Runtime entry point.
 
 Connects to AgentCore Gateway via MCP (Model Context Protocol) to access tools.
@@ -132,7 +134,7 @@ def invoke(payload, context=None):
 
     with mcp_client:
         tools = mcp_client.list_tools_sync()
-        agent = Agent(model=model, tools=tools, system_prompt=SYSTEM_PROMPT, hooks=hooks)
+        agent = Agent(model=model, tools=tools, system_prompt=SYSTEM_PROMPT, hooks=hooks, context_manager="auto")
 
         prompt = payload if isinstance(payload, str) else payload.get("prompt", "")
         result = agent(prompt)

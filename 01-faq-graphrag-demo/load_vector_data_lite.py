@@ -1,8 +1,16 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """
-Build LITE FAISS vector store from hotel FAQ documents.
+Build the LITE FAISS vector store from hotel FAQ documents.
 
-LITE VERSION: Processes only 30 documents (10% of full dataset) for faster testing.
-This matches the lite version of the Neo4j graph for fair comparison.
+How this script works
+---------------------
+Same pipeline as load_vector_data.py, but only the first 30 documents (10% of
+the dataset) so testing is fast. It embeds each doc locally with
+SentenceTransformer, builds a FAISS IndexFlatL2, and writes it with a _lite
+suffix (faqs_vector_lite.index / faqs_docs_lite.json) to avoid overwriting the
+full index. Use the lite build together with build_graph_lite.py for a fair
+RAG-vs-Graph-RAG comparison on the same 30 documents.
 """
 import faiss
 import json

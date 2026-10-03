@@ -1,12 +1,30 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """
-Build knowledge graph from hotel FAQ documents using neo4j-graphrag.
+Build the Neo4j knowledge graph from hotel FAQ documents (full dataset).
 
-Uses LLM to AUTOMATICALLY extract entities and relationships.
-No hardcoded schema - the LLM discovers entities from the text.
-Same 300 documents as the FAISS vector store.
+How this script works
+---------------------
+1. Clears any existing graph (MATCH (n) DETACH DELETE n).
+2. Runs neo4j-graphrag's SimpleKGPipeline over each of the 300 FAQ documents.
+   The pipeline: loads text -> chunks it -> embeds chunks (OpenAI
+   text-embedding-3-small) -> an LLM (OpenAI gpt-4o-mini) extracts entities and
+   relationships -> writes nodes/relationships to Neo4j.
+3. No fixed schema is passed, so the graph is "unconstrained": the LLM
+   auto-discovers labels, relationship types and property names from the text.
+   That is why the summary queries below filter labels defensively (CONTAINS
+   'Hotel') instead of assuming exact names.
+4. perform_entity_resolution=True merges duplicate entities across documents.
+
+This is the Graph-RAG side of the comparison; load_vector_data.py builds the
+FAISS index for the RAG side from the SAME documents.
+
+Neo4j best practice: sessions target an explicit database (NEO4J_DATABASE) and
+every driver opened here is closed when its work is done.
 """
 import os
 import asyncio
+import atexit
 os.environ['OTEL_SDK_DISABLED'] = 'true'
 
 from dotenv import load_dotenv
@@ -20,15 +38,34 @@ from neo4j_graphrag.embeddings import OpenAIEmbeddings
 NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://127.0.0.1:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+
+# Single Neo4j driver reused across clear/build/summary (best practice:
+# one driver per app, it owns a connection pool). Closed once at exit.
+_driver = None
+
+
+def _get_driver():
+    global _driver
+    if _driver is None:
+        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    return _driver
+
+
+@atexit.register
+def _close_driver():
+    global _driver
+    if _driver is not None:
+        _driver.close()
+        _driver = None
 
 
 async def build_graph():
     # Clear existing graph
     print("Clearing existing graph...")
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-    with driver.session() as session:
+    driver = _get_driver()
+    with driver.session(database=NEO4J_DATABASE) as session:
         session.run("MATCH (n) DETACH DELETE n")
-    driver.close()
     print("✅ Graph cleared\n")
 
     # LLM and embedder
@@ -42,7 +79,7 @@ async def build_graph():
     # schema="EXTRACTED" (default): LLM analyzes text, generates schema, then extracts
     kg_builder = SimpleKGPipeline(
         llm=llm,
-        driver=GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)),
+        driver=_get_driver(),
         embedder=embedder,
         from_pdf=False,
         perform_entity_resolution=True,
@@ -76,8 +113,8 @@ async def build_graph():
     print(f"GRAPH BUILD COMPLETE ({total - errors}/{total} docs processed)")
     print(f"{'='*60}")
 
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-    with driver.session() as session:
+    driver = _get_driver()
+    with driver.session(database=NEO4J_DATABASE) as session:
         result = session.run("""
             MATCH (n) 
             WHERE NOT 'Chunk' IN labels(n) AND NOT 'Document' IN labels(n)
@@ -122,7 +159,6 @@ async def build_graph():
         for r in result:
             print(f"  {r['h.name']} -> {r['c.name']}")
 
-    driver.close()
     print("\n✅ Done!")
 
 
