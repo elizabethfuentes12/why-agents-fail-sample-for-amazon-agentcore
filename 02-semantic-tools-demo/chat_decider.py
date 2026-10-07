@@ -14,7 +14,10 @@ Why a decision model instead of embeddings:
 
 The 2B weights download on first run (Hugging Face) and then run locally on CPU.
 
-Prerequisites: a running Neo4j with the hotel graph (see demo 01's build_graph.py).
+Prerequisites:
+  * a running Neo4j with the hotel graph (see demo 01's build_graph.py)
+  * the decision model installed: `uv pip install strands-decider`
+    (the first run downloads the ~2B weights from Hugging Face and caches them)
 
 Run:
     AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat_decider.py

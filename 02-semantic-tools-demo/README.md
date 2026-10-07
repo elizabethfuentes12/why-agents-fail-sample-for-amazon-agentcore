@@ -80,6 +80,41 @@ uv venv && uv pip install -r requirements.txt
 cp ../01-graphrag-demo/.env .env   # or set NEO4J_* yourself
 ```
 
+That is everything the FAISS demo (`chat.py` and the notebook) needs.
+
+### Optional: run the decision-model versions
+
+The decision-model files (`chat_decider.py`, `model_routing_with_jev.py`, and
+Part 5 of the notebook) need one or two extra installs. Do only the one you want.
+
+**Strands Decider (local 2B model), for `chat_decider.py`:**
+
+```bash
+uv pip install strands-decider
+```
+
+The first run downloads the ~2B model weights from Hugging Face (a few GB) and
+caches them, so the first launch is slow and later ones are fast. No API key, no
+account; it runs on your CPU. Then:
+
+```bash
+AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat_decider.py
+```
+
+**Jev (hosted decision model), for `model_routing_with_jev.py`:**
+
+```bash
+uv pip install "strands-decider[jev]"      # installs the TypeSafe SDK
+```
+
+Get an API key at [openrouter.ai/keys](https://openrouter.ai/keys), add a little
+credit (Jev is cheap), then set it in your shell:
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...
+AWS_PROFILE=<profile> AWS_REGION=us-east-1 python model_routing_with_jev.py
+```
+
 ### Run
 
 ```bash
@@ -90,6 +125,7 @@ token_efficiency_analysis.ipynb
 AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat.py
 
 # Same demo, but a decision model picks the tool instead of FAISS
+# (needs: uv pip install strands-decider — see "Optional" above)
 AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat_decider.py
 ```
 
