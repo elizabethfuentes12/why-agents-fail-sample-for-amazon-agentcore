@@ -115,6 +115,21 @@ export OPENROUTER_API_KEY=sk-or-...
 AWS_PROFILE=<profile> AWS_REGION=us-east-1 python model_routing_with_jev.py
 ```
 
+**OpenAI Decisions API (hosted decision model), for Part 6 of the notebook:**
+
+The [OpenAI Decisions API](https://platform.openai.com/docs/guides/decisions)
+(public beta, Oct 2026) is a hosted decision model like Jev: it returns a typed
+`choice` with confidence over the tool names — no embeddings, no index, no
+generated text. It runs on `gpt-6-luna` and is billed on **input tokens only**
+($0.10 / 1M). Get a key from the [OpenAI dashboard](https://platform.openai.com/api-keys),
+then set it (the notebook reads it from `.env` / the environment):
+
+```bash
+export OPENAI_API_KEY=sk-...
+# optional, only if you prefer the SDK over the raw REST call used in the notebook:
+uv pip install "openai>=3.26.0"
+```
+
 ### Run
 
 ```bash
@@ -133,7 +148,7 @@ AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat_decider.py
 
 | File | What it is |
 |------|------------|
-| `token_efficiency_analysis.ipynb` | The walkthrough: the big pool + small model (Part 1), the `SemanticToolHook` harness (Part 2), accuracy & tokens all-40 vs top-3 (Part 3), session memory (Part 4), and picking the tool with a decision model instead of FAISS (Part 5). |
+| `token_efficiency_analysis.ipynb` | The walkthrough: the big pool + small model (Part 1), the `SemanticToolHook` harness (Part 2), accuracy & tokens all-40 vs top-3 (Part 3), session memory (Part 4), picking the tool with a local decision model instead of FAISS (Part 5), and the hosted **OpenAI Decisions API** as a third selector (Part 6). |
 | `semantic_tools.py` | `ALL_TOOLS` (the ~40-tool pool: real hotel/weather/booking + stand-ins) and `SemanticToolHook`, copied so `chat.py` can import them. |
 | `booking_store.py` | JSON booking store (`book_hotel`, `get_booking`), swappable to DynamoDB. |
 | `chat.py` | REPL using the FAISS hook + `SnapshotSessionManager` for persistent memory. |
@@ -173,12 +188,16 @@ agent("How much does a room cost at Cliffside Resort?")
 
 FAISS and the decision model are independent and interchangeable inside the same
 hook. FAISS ranks by embedding distance (needs an index, costs embedding tokens);
-the decision model returns a calibrated choice (no index, no embeddings). See
-`chat_decider.py` and Part 5 of the notebook.
+the decision model returns a calibrated choice (no index, no embeddings). The
+decision model can be **local** (`strands-decider` 2B, Part 5 / `chat_decider.py`)
+or **hosted** (the OpenAI Decisions API on `gpt-6-luna`, Part 6 — calibrated
+`choice` + confidence, input-only billing at $0.10/1M, and it also accepts
+images). See `chat_decider.py` and Parts 5–6 of the notebook.
 
 ## Further Reading
 
 - [Introducing Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/) — the open-source Strands decision model (2B) used in `chat_decider.py` and Part 5.
+- [OpenAI Decisions API](https://platform.openai.com/docs/guides/decisions) — the hosted decision model (`gpt-6-luna`, public beta) used in Part 6: a bounded `choice`/`predicate`/`score` call billed on input tokens only.
 
 - [Internal Representations as Indicators of Hallucinations in Agent Tool Selection](https://arxiv.org/abs/2601.05214) — source of the tool-calling hallucination taxonomy. It detects hallucinations from a model's internal representations; it does not evaluate embedding pre-filtering, so none of this demo's numbers come from it.
 - [Search for tools in your Amazon Bedrock AgentCore Gateway with a natural-language query](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html) — the same idea as a managed service for production MCP tool routing.
