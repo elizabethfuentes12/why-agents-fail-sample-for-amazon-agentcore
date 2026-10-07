@@ -88,16 +88,21 @@ token_efficiency_analysis.ipynb
 
 # Or the interactive REPL (persistent memory across restarts)
 AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat.py
+
+# Same demo, but a decision model picks the tool instead of FAISS
+AWS_PROFILE=<profile> AWS_REGION=us-east-1 python chat_decider.py
 ```
 
 ## Files
 
 | File | What it is |
 |------|------------|
-| `token_efficiency_analysis.ipynb` | The walkthrough: the big pool + small model (Part 1), the `SemanticToolHook` harness (Part 2), accuracy & tokens all-40 vs top-3 (Part 3), session memory (Part 4). |
+| `token_efficiency_analysis.ipynb` | The walkthrough: the big pool + small model (Part 1), the `SemanticToolHook` harness (Part 2), accuracy & tokens all-40 vs top-3 (Part 3), session memory (Part 4), and picking the tool with a decision model instead of FAISS (Part 5). |
 | `semantic_tools.py` | `ALL_TOOLS` (the ~40-tool pool: real hotel/weather/booking + stand-ins) and `SemanticToolHook`, copied so `chat.py` can import them. |
 | `booking_store.py` | JSON booking store (`book_hotel`, `get_booking`), swappable to DynamoDB. |
-| `chat.py` | REPL using the hook + `SnapshotSessionManager` for persistent memory. |
+| `chat.py` | REPL using the FAISS hook + `SnapshotSessionManager` for persistent memory. |
+| `chat_decider.py` | Same REPL, but a decision model (`strands-decider` 2B, local) picks the tool instead of FAISS. |
+| `model_routing_with_jev.py` | Separate example: Strands model routing where a decision model (Jev, hosted) chooses which model serves each request. |
 
 ## How It Works
 
@@ -120,7 +125,24 @@ agent("How much does a room cost at Cliffside Resort?")
 # Cost: 3 descriptions. Risk: wrong pick among 3 — if the right tool was in the top-3.
 ```
 
+### Decision model — the model picks the tool
+
+```python
+hook = DeciderToolHook(ALL_TOOLS)   # strands-decider 2B, local
+agent = Agent(model=MODEL, tools=ALL_TOOLS, hooks=[hook])
+agent("How much does a room cost at Cliffside Resort?")
+# Same before-invocation hook, but a decision model returns a calibrated pick
+# over the tool names — no embeddings, no index, no generated text.
+```
+
+FAISS and the decision model are independent and interchangeable inside the same
+hook. FAISS ranks by embedding distance (needs an index, costs embedding tokens);
+the decision model returns a calibrated choice (no index, no embeddings). See
+`chat_decider.py` and Part 5 of the notebook.
+
 ## Further Reading
+
+- [Introducing Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/) — the open-source Strands decision model (2B) used in `chat_decider.py` and Part 5.
 
 - [Internal Representations as Indicators of Hallucinations in Agent Tool Selection](https://arxiv.org/abs/2601.05214) — source of the tool-calling hallucination taxonomy. It detects hallucinations from a model's internal representations; it does not evaluate embedding pre-filtering, so none of this demo's numbers come from it.
 - [Search for tools in your Amazon Bedrock AgentCore Gateway with a natural-language query](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html) — the same idea as a managed service for production MCP tool routing.
