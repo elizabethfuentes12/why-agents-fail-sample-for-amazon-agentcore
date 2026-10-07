@@ -1,33 +1,36 @@
-# Source for static/images/neurosymbolic.png
-# Also installed as 04-neurosymbolic-demo/images/neurosymbolic.png
+# Source for static/images/multiagent-flow.png
+# Also installed as 03-multiagent-demo/images/executor-validator-critic-chain.png
 # in the companion code repo (the two files are identical).
 #
 # Render:
-#   d2 --theme 0 --pad 30 neurosymbolic.d2 neurosymbolic.png
+#   d2 --theme 0 --pad 30 multiagent-flow.d2 multiagent-flow.png
 #   then downscale to 2200px wide (sips -Z 2200).
 #
 # Rules for editing (see progressive-flow.d2 for the full set):
-#  - Every identifier here is taken from the demo, not paraphrased:
-#    BeforeToolCallEvent and event.cancel_tool are in test_neurosymbolic_hooks.py,
-#    the guests <= 10 condition and the "Maximum 10 guests per booking" message are
-#    in rules.py, and the cancel message the LLM receives starts with "BLOCKED:".
-#  - No results in this image. The 3-of-3 blocked figure lives in the content table
-#    where the scenarios that produced it are listed; a diagram that repeats it out
-#    of context reads like a benchmark.
-#  - No red/green pair: the accessibility checklist forbids it. The version this
-#    replaced used a red panel against a green panel with X and check marks. The
-#    contrast is now gray (the prompt) against AWS blue (the hook).
-#  - Both bands are the same shape (3 cards) so the columns line up: where the rule
-#    is written, what happens when the agent breaks it, and what the agent is told.
+#  - No number appears here that the demo does not establish. "3 LLM calls instead
+#    of 1" is the trade-off content/multiagent/index.en.md states; AnyCompany
+#    Antarctica is the hotel deliberately missing from the HOTELS dictionary in
+#    tools.py. There is no accuracy figure because the demo does not measure one:
+#    the file this replaced was named single-vs-multi-agent-accuracy.png and
+#    contained no accuracy data at all.
+#  - Do not claim the single agent "defends" its own hallucination. The content says
+#    so in prose, but it is an assertion, not a measurement. What is plainly true is
+#    that nothing else checks the answer, so that is what the card says.
+#  - No red/green pair: the accessibility checklist forbids it. The contrast is gray
+#    (one agent) against AWS blue (the swarm).
+#  - The two bands are deliberately the same shape (3 cards, 2 arrows) so the columns
+#    line up: both act, then one reports itself while the other gets checked, then
+#    one is silent while the other returns a status.
 #  - Grid layout is required: d2 0.7.1 ignores `direction` inside a container.
 #  - Widths go on the inner text nodes, never on the card container: a container with
-#    an explicit width clips its text. Keep both bands at 3 * 500.
+#    an explicit width clips its text. Both bands are 3 * 460 + 2 * 40, so changing a
+#    card width means changing it in both bands.
 
 grid-rows: 4
 vertical-gap: 26
 horizontal-gap: 24
 
-title: "A suggestion and a constraint" {
+title: "Three agents instead of one" {
   height: 48
   style: {
     font-size: 32
@@ -38,7 +41,7 @@ title: "A suggestion and a constraint" {
   }
 }
 
-subtitle: "The same 10-guest limit, written in two different places" {
+subtitle: "The same booking request, judged by an agent that did not carry it out" {
   height: 28
   style: {
     font-size: 17
@@ -48,9 +51,9 @@ subtitle: "The same 10-guest limit, written in two different places" {
   }
 }
 
-prompt: "In the system prompt   ·   the LLM reads the rule and decides what to do with it" {
-  grid-columns: 3
-  horizontal-gap: 18
+single: "Single agent   ·   the agent that acts is the agent that reports" {
+  grid-columns: 5
+  horizontal-gap: 14
   vertical-gap: 6
   style: {
     stroke: "#5F6B7A"
@@ -71,8 +74,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
       fill: "#FFFFFF"
       border-radius: 10
     }
-    t: "Written in words" {
-      width: 500
+    t: "One agent does everything" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -82,8 +85,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
         font-color: "#16191F"
       }
     }
-    s: "IMPORTANT: maximum 10 guests,\nsomewhere in the system prompt" {
-      width: 500
+    s: "Searches, books, and writes the\nanswer the user will read" {
+      width: 460
       height: 56
       style: {
         font-size: 16
@@ -91,6 +94,17 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
         fill: transparent
         font-color: "#5F6B7A"
       }
+    }
+  }
+
+  x1: "→" {
+    width: 40
+    height: 30
+    style: {
+      font-size: 26
+      stroke-width: 0
+      fill: transparent
+      font-color: "#8A96A3"
     }
   }
 
@@ -103,8 +117,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
       fill: "#FFFFFF"
       border-radius: 10
     }
-    t: "Nothing checks the call" {
-      width: 500
+    t: "Nobody else checks" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -114,8 +128,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
         font-color: "#16191F"
       }
     }
-    s: "book_hotel(guests=15) runs and the\nbooking is created for 15 guests" {
-      width: 500
+    s: "The answer reaches the user with\nno second opinion on it" {
+      width: 460
       height: 56
       style: {
         font-size: 16
@@ -123,6 +137,17 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
         fill: transparent
         font-color: "#5F6B7A"
       }
+    }
+  }
+
+  x2: "→" {
+    width: 40
+    height: 30
+    style: {
+      font-size: 26
+      stroke-width: 0
+      fill: transparent
+      font-color: "#8A96A3"
     }
   }
 
@@ -135,8 +160,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
       fill: "#F2F3F5"
       border-radius: 10
     }
-    t: "The agent hears nothing" {
-      width: 500
+    t: "A silent success" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -146,8 +171,8 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
         font-color: "#16191F"
       }
     }
-    s: "The tool returns a success, so the\nrule is broken without a signal" {
-      width: 500
+    s: "A confirmed booking at AnyCompany\nAntarctica, a hotel that does not exist" {
+      width: 460
       height: 56
       style: {
         font-size: 16
@@ -159,9 +184,9 @@ prompt: "In the system prompt   ·   the LLM reads the rule and decides what to 
   }
 }
 
-hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM call" {
-  grid-columns: 3
-  horizontal-gap: 18
+swarm: "Swarm   ·   3 LLM calls instead of 1   ·   no agent marks its own work" {
+  grid-columns: 5
+  horizontal-gap: 14
   vertical-gap: 6
   style: {
     stroke: "#0972D3"
@@ -182,8 +207,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
       fill: "#FFFFFF"
       border-radius: 10
     }
-    t: "Written in code" {
-      width: 500
+    t: "Executor" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -193,8 +218,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
         font-color: "#16191F"
       }
     }
-    s: "ctx.get(\"guests\", 1) <= 10, a pure\nfunction with no LLM in it" {
-      width: 500
+    s: "The only agent with tools.\nIt searches and it books." {
+      width: 460
       height: 56
       style: {
         font-size: 16
@@ -202,6 +227,17 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
         fill: transparent
         font-color: "#5F6B7A"
       }
+    }
+  }
+
+  y1: "→" {
+    width: 40
+    height: 30
+    style: {
+      font-size: 26
+      stroke-width: 0
+      fill: transparent
+      font-color: "#0972D3"
     }
   }
 
@@ -214,8 +250,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
       fill: "#FFFFFF"
       border-radius: 10
     }
-    t: "The call never runs" {
-      width: 500
+    t: "Validator" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -225,8 +261,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
         font-color: "#16191F"
       }
     }
-    s: "event.cancel_tool stops book_hotel\nbefore the function is entered" {
-      width: 500
+    s: "No tools, so it can only compare the\nanswer against the original request" {
+      width: 460
       height: 56
       style: {
         font-size: 16
@@ -234,6 +270,17 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
         fill: transparent
         font-color: "#5F6B7A"
       }
+    }
+  }
+
+  y2: "→" {
+    width: 40
+    height: 30
+    style: {
+      font-size: 26
+      stroke-width: 0
+      fill: transparent
+      font-color: "#0972D3"
     }
   }
 
@@ -246,8 +293,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
       fill: "#EFF7FE"
       border-radius: 10
     }
-    t: "The agent is told why" {
-      width: 500
+    t: "Critic" {
+      width: 460
       height: 30
       style: {
         font-size: 19
@@ -257,8 +304,8 @@ hook: "In a BeforeToolCallEvent hook   ·   deterministic code, no extra LLM cal
         font-color: "#16191F"
       }
     }
-    s: "It reads BLOCKED: Maximum 10 guests\nper booking as the tool result" {
-      width: 500
+    s: "APPROVED, SUSPICIOUS or INVALID.\nA status, not a silent answer." {
+      width: 460
       height: 56
       style: {
         font-size: 16

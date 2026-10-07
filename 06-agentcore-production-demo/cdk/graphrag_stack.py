@@ -59,12 +59,6 @@ class GraphRAGStack(cdk.Stack):
             description="AuraDB password",
         )
 
-        openai_api_key_secret = secretsmanager.Secret(
-            self, "OpenAIApiKey",
-            secret_name=f"/{id}/openai-api-key",
-            description="OpenAI API key for graph building (SimpleKGPipeline)",
-        )
-
         # --- S3 Bucket + auto-upload docs ---
 
         docs_bucket = s3.Bucket(
@@ -99,7 +93,6 @@ class GraphRAGStack(cdk.Stack):
                 "NEO4J_URI_SECRET_ARN": neo4j_uri_secret.secret_arn,
                 "NEO4J_USER_SECRET_ARN": neo4j_user.secret_arn,
                 "NEO4J_PASSWORD_SECRET_ARN": neo4j_password.secret_arn,
-                "OPENAI_API_KEY_SECRET_ARN": openai_api_key_secret.secret_arn,
             },
         )
 
@@ -107,7 +100,12 @@ class GraphRAGStack(cdk.Stack):
         neo4j_uri_secret.grant_read(build_lambda)
         neo4j_user.grant_read(build_lambda)
         neo4j_password.grant_read(build_lambda)
-        openai_api_key_secret.grant_read(build_lambda)
+        build_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["bedrock:InvokeModel"],
+                resources=["*"],
+            )
+        )
 
         # --- Graph Build Trigger ---
 
@@ -115,7 +113,7 @@ class GraphRAGStack(cdk.Stack):
             # Full mode: Step Functions batches 300 docs across multiple Lambda invocations
             self._create_step_functions_pipeline(
                 build_lambda, docs_bucket, max_docs,
-                neo4j_uri_secret, neo4j_user, neo4j_password, openai_api_key_secret,
+                neo4j_uri_secret, neo4j_user, neo4j_password,
             )
         # Note: graph build is NOT auto-triggered during deploy.
         # Populate secrets first, then invoke manually:
@@ -166,7 +164,6 @@ class GraphRAGStack(cdk.Stack):
         cdk.CfnOutput(self, "Neo4jUriSecretArn", value=neo4j_uri_secret.secret_arn)
         cdk.CfnOutput(self, "Neo4jUserSecretArn", value=neo4j_user.secret_arn)
         cdk.CfnOutput(self, "Neo4jPasswordSecretArn", value=neo4j_password.secret_arn)
-        cdk.CfnOutput(self, "OpenAIKeySecretArn", value=openai_api_key_secret.secret_arn)
         cdk.CfnOutput(
             self, "BuildGraphCommand",
             value=(
@@ -178,7 +175,7 @@ class GraphRAGStack(cdk.Stack):
 
     def _create_step_functions_pipeline(
         self, build_lambda, docs_bucket, max_docs,
-        neo4j_uri_secret, neo4j_user, neo4j_password, openai_api_key_secret,
+        neo4j_uri_secret, neo4j_user, neo4j_password,
     ):
         """Create Step Functions pipeline for full 300-doc processing."""
 
@@ -205,7 +202,6 @@ class GraphRAGStack(cdk.Stack):
                     "NEO4J_URI_SECRET_ARN": neo4j_uri_secret.secret_arn,
                     "NEO4J_USER_SECRET_ARN": neo4j_user.secret_arn,
                     "NEO4J_PASSWORD_SECRET_ARN": neo4j_password.secret_arn,
-                    "OPENAI_API_KEY_SECRET_ARN": openai_api_key_secret.secret_arn,
                 },
             )
 
@@ -213,7 +209,12 @@ class GraphRAGStack(cdk.Stack):
             neo4j_uri_secret.grant_read(batch_lambda)
             neo4j_user.grant_read(batch_lambda)
             neo4j_password.grant_read(batch_lambda)
-            openai_api_key_secret.grant_read(batch_lambda)
+            batch_lambda.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["bedrock:InvokeModel"],
+                    resources=["*"],
+                )
+            )
 
             step = sfn_tasks.LambdaInvoke(
                 self, f"ProcessBatch{batch_start}",

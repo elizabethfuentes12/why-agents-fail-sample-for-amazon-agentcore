@@ -1,4 +1,0 @@
-strands-agents[openai]>=1.56.0
-agent-control-sdk>=0.0.1
-python-dotenv>=1.0.0
-pyyaml>=6.0

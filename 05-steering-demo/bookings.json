@@ -1,0 +1,16 @@
+{
+  "BK0001": {
+    "hotel": "Cliffside Resort",
+    "guest": "Jordan Lee",
+    "guests": 10,
+    "nights": 1,
+    "created_at": "2026-10-07T01:35:01.461860Z"
+  },
+  "BK0002": {
+    "hotel": "Cliffside Resort",
+    "guest": "Jordan Lee",
+    "guests": 5,
+    "nights": 1,
+    "created_at": "2026-10-07T01:35:01.463676Z"
+  }
+}

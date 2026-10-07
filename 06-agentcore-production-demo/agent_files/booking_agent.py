@@ -12,21 +12,15 @@ from datetime import datetime
 import boto3
 from bedrock_agentcore import BedrockAgentCoreApp
 from strands import Agent
+from strands.models import BedrockModel
 from strands.tools.mcp.mcp_client import MCPClient
 from mcp.client.streamable_http import streamablehttp_client
 
-# Using OpenAI-compatible interface via Strands SDK (not direct OpenAI usage)
-from strands.models.openai import OpenAIModel
-
 # --- Configuration from CDK environment variables ---
 
-OPENAI_KEY_SECRET_ARN = os.environ["OPENAI_KEY_SECRET_ARN"]
 GATEWAY_URL = os.environ["GATEWAY_URL"]
 
 _region = os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
-_secrets = boto3.client("secretsmanager", region_name=_region)
-
-_openai_api_key = _secrets.get_secret_value(SecretId=OPENAI_KEY_SECRET_ARN)["SecretString"]
 
 
 # --- Hard guardrails (hooks — cannot be bypassed by the LLM) ---
@@ -127,7 +121,7 @@ app = BedrockAgentCoreApp()
 @app.entrypoint
 def invoke(payload, context=None):
     """Entry point for AgentCore Runtime invocations."""
-    model = OpenAIModel(model_id="gpt-4o-mini", client_args={"api_key": _openai_api_key})
+    model = BedrockModel(region_name=_region)
     hooks = [BookingGuardrailsHook()]
 
     mcp_client = MCPClient(lambda: streamablehttp_client(GATEWAY_URL))

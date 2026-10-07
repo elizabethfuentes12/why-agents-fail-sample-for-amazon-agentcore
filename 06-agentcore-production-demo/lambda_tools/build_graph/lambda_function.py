@@ -3,7 +3,8 @@
 Triggered as a CDK Custom Resource after BucketDeployment completes.
 Uses SimpleKGPipeline from neo4j-graphrag to auto-discover schema.
 
-Based on the proven approach from 01-faq-graphrag-demo/build_graph_lite.py.
+Based on the proven approach from 01-faq-graphrag-demo/build_graph.py.
+Uses Amazon Bedrock (Claude Sonnet 4 for extraction, Nova 2 for embeddings).
 """
 
 import asyncio
@@ -12,9 +13,9 @@ import os
 
 import boto3
 from neo4j import GraphDatabase
-from neo4j_graphrag.embeddings import OpenAIEmbeddings
+from neo4j_graphrag.embeddings.base import Embedder
 from neo4j_graphrag.experimental.pipeline.kg_builder import SimpleKGPipeline
-from neo4j_graphrag.llm import OpenAILLM
+from neo4j_graphrag.llm.base import LLMInterface, LLMResponse
 
 s3 = boto3.client("s3")
 secrets = boto3.client("secretsmanager")
@@ -24,10 +25,55 @@ DOCS_S3_PREFIX = os.environ.get("DOCS_S3_PREFIX", "hotel-faqs/")
 MAX_DOCS = int(os.environ.get("MAX_DOCS", "30"))
 SKIP_DOCS = int(os.environ.get("SKIP_DOCS", "0"))
 SKIP_CLEAR = os.environ.get("SKIP_CLEAR", "false") == "true"
+AWS_REGION = os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
 NEO4J_URI_SECRET_ARN = os.environ["NEO4J_URI_SECRET_ARN"]
 NEO4J_USER_SECRET_ARN = os.environ["NEO4J_USER_SECRET_ARN"]
 NEO4J_PASSWORD_SECRET_ARN = os.environ["NEO4J_PASSWORD_SECRET_ARN"]
-OPENAI_API_KEY_SECRET_ARN = os.environ["OPENAI_API_KEY_SECRET_ARN"]
+
+
+# --- Amazon Bedrock wrappers that neo4j-graphrag's pipeline requires ---
+
+class BedrockLLM(LLMInterface):
+    """Claude Sonnet 4 via the Bedrock Converse API (entity extraction)."""
+
+    def __init__(self, model_id="global.anthropic.claude-sonnet-4-6", region=AWS_REGION):
+        self.model_id = model_id
+        self.client = boto3.client("bedrock-runtime", region_name=region)
+
+    def _converse(self, text, system_instruction=None):
+        kwargs = {
+            "modelId": self.model_id,
+            "messages": [{"role": "user", "content": [{"text": text}]}],
+            "inferenceConfig": {"temperature": 0, "maxTokens": 4096},
+        }
+        if system_instruction:
+            kwargs["system"] = [{"text": system_instruction}]
+        resp = self.client.converse(**kwargs)
+        return LLMResponse(content=resp["output"]["message"]["content"][0]["text"])
+
+    def invoke(self, input, message_history=None, system_instruction=None):
+        return self._converse(input, system_instruction)
+
+    async def ainvoke(self, input, message_history=None, system_instruction=None):
+        return await asyncio.to_thread(self._converse, input, system_instruction)
+
+
+class BedrockEmbeddings(Embedder):
+    """Amazon Nova 2 Multimodal Embeddings (1024-dim) for chunk vectors."""
+
+    def __init__(self, model_id="amazon.nova-2-multimodal-embeddings-v1:0", region=AWS_REGION):
+        self.model_id = model_id
+        self.client = boto3.client("bedrock-runtime", region_name=region)
+
+    def embed_query(self, text):
+        resp = self.client.invoke_model(
+            modelId=self.model_id,
+            body=json.dumps({"taskType": "SINGLE_EMBEDDING", "singleEmbeddingParams": {
+                "embeddingPurpose": "GENERIC_INDEX", "embeddingDimension": 1024,
+                "text": {"truncationMode": "END", "value": text[:8000]}}}),
+            contentType="application/json", accept="application/json",
+        )
+        return json.loads(resp["body"].read())["embeddings"][0]["embedding"]
 
 
 def _get_secret(arn):
@@ -92,9 +138,6 @@ def handler(event, context):
     neo4j_uri = _get_secret(NEO4J_URI_SECRET_ARN)
     neo4j_user = _get_secret(NEO4J_USER_SECRET_ARN)
     neo4j_password = _get_secret(NEO4J_PASSWORD_SECRET_ARN)
-    openai_api_key = _get_secret(OPENAI_API_KEY_SECRET_ARN)
-
-    os.environ["OPENAI_API_KEY"] = openai_api_key
 
     print(f"Connecting to Neo4j at {neo4j_uri}...")
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
@@ -113,12 +156,8 @@ def handler(event, context):
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")
 
-    llm = OpenAILLM(
-        model_name="gpt-4o-mini",
-        api_key=openai_api_key,
-        model_params={"temperature": 0, "response_format": {"type": "json_object"}},
-    )
-    embedder = OpenAIEmbeddings(model="text-embedding-3-small")
+    llm = BedrockLLM()
+    embedder = BedrockEmbeddings()
 
     total, errors = asyncio.run(_build_graph(docs, driver, llm, embedder))
 

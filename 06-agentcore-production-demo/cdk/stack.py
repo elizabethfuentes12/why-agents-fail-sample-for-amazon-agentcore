@@ -1,8 +1,7 @@
-"""Main CDK stack: DynamoDB + Secrets Manager + AgentCore Gateway + Runtime."""
+"""Main CDK stack: DynamoDB + AgentCore Gateway + Runtime (Amazon Bedrock)."""
 
 import aws_cdk as cdk
 import aws_cdk.aws_dynamodb as dynamodb
-import aws_cdk.aws_secretsmanager as secretsmanager
 from constructs import Construct
 
 from agentcore import AgentCoreGateway, AgentCoreRole, AgentCoreRuntime
@@ -47,21 +46,19 @@ class HotelBookingAgentStack(cdk.Stack):
             removal_policy=cdk.RemovalPolicy.DESTROY,
         )
 
-        # --- Secrets Manager ---
-
-        openai_key_secret = secretsmanager.Secret(
-            self,
-            "OpenAIKeySecret",
-            secret_name=f"/{id}/openai-api-key",
-            description="OpenAI API key for the booking agent",
-        )
-
         # --- AgentCore IAM role ---
 
         execution_role = AgentCoreRole(self, "AgentCoreRole")
 
         bookings_table.grant_read_data(execution_role.role)
-        openai_key_secret.grant_read(execution_role.role)
+
+        # Allow the agent to invoke Amazon Bedrock models (Claude Sonnet 4).
+        execution_role.role.add_to_policy(
+            cdk.aws_iam.PolicyStatement(
+                actions=["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+                resources=["*"],
+            )
+        )
 
         # --- GraphRAG integration (optional) ---
 
@@ -91,7 +88,6 @@ class HotelBookingAgentStack(cdk.Stack):
             environment_variables={
                 "AWS_REGION": self.region,
                 "BOOKINGS_TABLE": bookings_table.table_name,
-                "OPENAI_KEY_SECRET_ARN": openai_key_secret.secret_arn,
                 "GATEWAY_URL": gateway.gateway.attr_gateway_url,
             },
         )
@@ -101,7 +97,6 @@ class HotelBookingAgentStack(cdk.Stack):
         cdk.CfnOutput(self, "HotelsTableName", value=hotels_table.table_name)
         cdk.CfnOutput(self, "BookingsTableName", value=bookings_table.table_name)
         cdk.CfnOutput(self, "SteeringRulesTableName", value=steering_rules_table.table_name)
-        cdk.CfnOutput(self, "OpenAIKeySecretArn", value=openai_key_secret.secret_arn)
         cdk.CfnOutput(self, "GatewayUrl", value=gateway.gateway.attr_gateway_url)
         cdk.CfnOutput(self, "AgentRuntimeArn", value=runtime.runtime.attr_agent_runtime_arn)
         cdk.CfnOutput(self, "GatewayId", value=gateway.gateway.attr_gateway_identifier)

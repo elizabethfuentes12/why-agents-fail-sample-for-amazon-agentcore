@@ -6,7 +6,7 @@
 [![Neo4j](https://img.shields.io/badge/Neo4j-Graph--RAG-4581C3.svg?style=flat&logo=neo4j)](https://neo4j.com)
 [![License: MIT-0](https://img.shields.io/badge/License-MIT--0-green.svg)](LICENSE)
 
-> **AI agents hallucinate statistics, pick wrong tools, ignore business rules, and claim success when operations fail.** This repository provides 6 hands-on demos, from research-backed local experiments to production deployment on AWS, showing how to detect, prevent, and self-correct these failures using Graph-RAG, semantic tool filtering, multi-agent validation, neurosymbolic guardrails, [Agent Control](https://github.com/agentcontrol/agent-control) steering, and [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production deployment.
+> **AI agents hallucinate statistics, pick wrong tools, ignore business rules, and claim success when operations fail.** This repository provides 6 hands-on demos, from research-backed local experiments to production deployment on AWS, showing how to detect, prevent, and self-correct these failures using Graph-RAG, semantic tool filtering, multi-agent validation, neurosymbolic guardrails, native Strands agent steering, and [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/?trk=87c4c426-cddf-4799-a299-273337552ad8&sc_channel=el) for production deployment.
 
 Built with [Strands Agents](https://strandsagents.com). Similar patterns can be applied in LangGraph, AutoGen, CrewAI, or other agent frameworks.
 
@@ -24,7 +24,7 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 | 02 | [Semantic Tool Selection](./02-semantic-tools-demo/) | Wrong tool picks, token waste at scale (29 tools) | 89% token reduction, higher accuracy | ![FAISS](https://img.shields.io/badge/FAISS-blue?style=flat) ![Embeddings](https://img.shields.io/badge/Embeddings-teal?style=flat) |
 | 03 | [Multi-Agent Validation](./03-multiagent-demo/) | Undetected hallucinations, fabricated responses | Executor-Validator-Critic cross-check pipeline | ![Swarm](https://img.shields.io/badge/Swarm-green?style=flat) |
 | 04 | [Neurosymbolic Guardrails](./04-neurosymbolic-demo/) | Agents ignoring business rules in prompts | Symbolic rules enforced via lifecycle hooks | ![Hooks](https://img.shields.io/badge/Hooks-purple?style=flat) |
-| 05 | [Agent Control Steering](./05-agent-control-demo/) | Hard-blocking stops the task instead of fixing it | Agent self-corrects instead of failing | ![Agent Control](https://img.shields.io/badge/Agent_Control-orange?style=flat) |
+| 05 | [Agent Steering](./05-steering-demo/) | Hard-blocking stops the task instead of fixing it | Agent self-corrects instead of failing | ![Steering](https://img.shields.io/badge/Steering-orange?style=flat) |
 | 06 | [Amazon Bedrock AgentCore Production](./06-agentcore-production-demo/) | Taking all techniques to production on AWS | Full deployment with CDK, Lambda, DynamoDB, Amazon Bedrock AgentCore | ![AWS CDK](https://img.shields.io/badge/CDK-v2-FF9900?style=flat&logo=amazon-aws) ![DynamoDB](https://img.shields.io/badge/DynamoDB-4053D6?style=flat&logo=amazon-dynamodb) ![Lambda](https://img.shields.io/badge/Lambda-FF9900?style=flat&logo=aws-lambda) |
 
 ### Demo 06: Production Architecture
@@ -41,7 +41,7 @@ Each demo builds on the previous one. You can run any demo independently, but th
 
 **Phase 2, Detect and Prevent:** Demos 03-04 show *how to catch* failures: multi-agent validation and symbolic rule enforcement.
 
-**Phase 3, Self-Correct and Deploy:** Demo 05 shows *how to steer* agents to self-correct instead of blocking (Agent Control), and Demo 06 shows *how to ship* all techniques to production on AWS (Amazon Bedrock AgentCore, DynamoDB, Lambda).
+**Phase 3, Self-Correct and Deploy:** Demo 05 shows *how to steer* agents to self-correct instead of blocking (native Strands steering), and Demo 06 shows *how to ship* all techniques to production on AWS (Amazon Bedrock AgentCore, DynamoDB, Lambda).
 
 ---
 
@@ -51,7 +51,7 @@ Each demo builds on the previous one. You can run any demo independently, but th
 
 - Python 3.9+
 - [uv](https://docs.astral.sh/uv/) package manager
-- [OpenAI API key](https://platform.openai.com/api-keys) (or any [Strands-supported provider](https://strandsagents.com/docs/user-guide/concepts/model-providers/): Amazon Bedrock, Anthropic, Ollama)
+- [OpenAI API key](https://platform.openai.com/api-keys) (or any [Strands-supported provider](https://strandsagents.com/docs/user-guide/sdk/model-providers/): Amazon Bedrock, Anthropic, Ollama)
 
 ### Run Any Demo
 
@@ -114,7 +114,7 @@ Demos 02-05 run in under 5 minutes. Demo 01 has a lite mode (30 docs, ~15 minute
 
 ### What LLM providers are supported?
 
-All demos default to OpenAI GPT-4o-mini but work with any provider supported by Strands Agents: Amazon Bedrock (Claude, Titan), Anthropic API, Ollama (local models), or any OpenAI-compatible endpoint. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for configuration.
+All demos default to OpenAI GPT-4o-mini but work with any provider supported by Strands Agents: Amazon Bedrock (Claude, Titan), Anthropic API, Ollama (local models), or any OpenAI-compatible endpoint. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/sdk/model-providers/) for configuration.
 
 ---
 
@@ -126,7 +126,7 @@ All demos default to OpenAI GPT-4o-mini but work with any provider supported by 
 
 **OpenTelemetry warnings:** "Failed to detach context" warnings in demos 03-05 are harmless and do not affect functionality.
 
-**Model alternatives:** Change the model in any demo by modifying the `OpenAIModel()` constructor. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/concepts/model-providers/) for all supported options.
+**Model alternatives:** Change the model in any demo by modifying the `OpenAIModel()` constructor. See [Strands Model Providers](https://strandsagents.com/docs/user-guide/sdk/model-providers/) for all supported options.
 
 For demo-specific issues, check the troubleshooting section in each demo's README.
 
