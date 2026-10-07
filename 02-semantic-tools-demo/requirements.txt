@@ -1,6 +1,24 @@
+# Core: agent framework + the FAISS semantic-tool-selection path
 strands-agents==1.58.0
-neo4j==6.4.0
-boto3==1.43.108
 faiss-cpu==1.15.1
 numpy==2.2.6
+boto3==1.43.108            # Amazon Bedrock model provider
+neo4j==6.4.0               # hotel graph (demo 01 builds it)
 python-dotenv==1.2.4
+
+# Local decision model (Part 5 / chat_decider.py) — pulls torch + transformers,
+# downloads the strands-decider 2B on first run.
+strands-decider==0.1.0
+
+# Jev decision model via OpenRouter (model_routing_with_jev.py)
+typesafe-sdk==0.7.2
+
+# Running the notebooks (token_efficiency_analysis.ipynb,
+# openai_decisions_tool_selection.ipynb, tool_selection_decision.ipynb)
+jupyter==1.1.1
+nbconvert==7.16.6
+ipykernel==7.1.0
+
+# NOTE: the OpenAI Decisions API path (openai_decisions_tool_selection.ipynb,
+# Part 6) uses only the standard library (urllib) + OPENAI_API_KEY, so no
+# `openai` package is required.
