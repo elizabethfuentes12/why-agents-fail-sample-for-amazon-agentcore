@@ -13,12 +13,11 @@ strands-decider==0.1.0
 # Jev decision model via OpenRouter (model_routing_with_jev.py)
 typesafe-sdk==0.7.2
 
+# OpenAI Decisions API (gpt-6-luna) — tool selection and model routing notebooks
+openai>=3.26.0
+
 # Running the notebooks (token_efficiency_analysis.ipynb,
-# openai_decisions_tool_selection.ipynb, tool_selection_decision.ipynb)
+# tool_selection_decision.ipynb, model_routing_decision.ipynb)
 jupyter==1.1.1
 nbconvert==7.16.6
 ipykernel==7.1.0
-
-# NOTE: the OpenAI Decisions API path (openai_decisions_tool_selection.ipynb,
-# Part 6) uses only the standard library (urllib) + OPENAI_API_KEY, so no
-# `openai` package is required.
