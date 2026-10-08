@@ -1,4 +1,8 @@
 strands-agents>=1.56.0
+# --- OpenAI model provider (optional) ---
+# Needed only if you switch the agents to OpenAI in test_graphrag.ipynb
+# (uncomment the OpenAIModel block there). Requires OPENAI_API_KEY in .env.
+# strands-agents[openai]>=1.56.0
 boto3>=1.35.0
 numpy>=1.24.0
 neo4j>=5.28.0

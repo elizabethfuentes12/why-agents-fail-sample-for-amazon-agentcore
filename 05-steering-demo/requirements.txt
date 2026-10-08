@@ -1,4 +1,8 @@
 strands-agents==1.58.0
+# --- OpenAI model provider (optional) ---
+# Only needed to switch the agents to OpenAI (see the commented OpenAIModel
+# block in the notebook). Requires OPENAI_API_KEY in .env.
+# strands-agents[openai]==1.58.0
 neo4j==6.4.0
 boto3==1.43.108
 python-dotenv==1.2.4

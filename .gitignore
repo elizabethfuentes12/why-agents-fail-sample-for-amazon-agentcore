@@ -47,6 +47,10 @@ plugins/
 # Logs
 *.log
 
+# Runtime artifacts from running the demos (regenerated on each run)
+sessions/
+02-semantic-tools-demo/bookings.json
+
 # Claude Code
 .claude
 CLAUDE.md
@@ -63,6 +67,10 @@ deployment_package.zip
 generated-diagrams/
 
 /blog-es
+
+# Blog drafts (not part of the demos)
+blog-openai-decisions-strands.md
+blog-openai-decisions-strands-es.md
 
 # Private beta testing files
 invoke.py

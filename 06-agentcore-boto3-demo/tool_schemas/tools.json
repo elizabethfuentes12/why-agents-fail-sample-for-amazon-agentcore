@@ -1,0 +1,184 @@
+[
+  {
+    "name": "search_available_hotels",
+    "description": "Search for available hotels. Filter by city, country, max price per night, or minimum stars. At least one filter must be provided. Returns only hotels with available rooms.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "City name to search (e.g. 'Paris', 'Tokyo'). Case-insensitive."
+        },
+        "country": {
+          "type": "string",
+          "description": "Country name to search (e.g. 'France', 'Japan'). Case-insensitive."
+        },
+        "max_price": {
+          "type": "integer",
+          "description": "Maximum price per night in USD. Use 0 to skip this filter."
+        },
+        "min_stars": {
+          "type": "integer",
+          "description": "Minimum star rating (1-5). Use 0 to skip this filter."
+        }
+      }
+    }
+  },
+  {
+    "name": "book_hotel",
+    "description": "Book a hotel room. Creates a reservation with status PENDING.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "hotel_id": {
+          "type": "string",
+          "description": "The hotel ID from search results (e.g. 'grand-hotel-paris')."
+        },
+        "guest_name": {
+          "type": "string",
+          "description": "Full name of the guest making the reservation."
+        },
+        "check_in": {
+          "type": "string",
+          "description": "Check-in date in ISO format (YYYY-MM-DD)."
+        },
+        "check_out": {
+          "type": "string",
+          "description": "Check-out date in ISO format (YYYY-MM-DD)."
+        },
+        "guests": {
+          "type": "integer",
+          "description": "Number of guests (default 1)."
+        }
+      },
+      "required": [
+        "hotel_id",
+        "guest_name",
+        "check_in",
+        "check_out"
+      ]
+    }
+  },
+  {
+    "name": "get_booking",
+    "description": "Retrieve the current status and details of a booking.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "description": "The booking ID (e.g. 'BK-A1B2C3D4')."
+        }
+      },
+      "required": [
+        "booking_id"
+      ]
+    }
+  },
+  {
+    "name": "process_payment",
+    "description": "Process payment for a PENDING booking. Updates status to PAID.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "description": "The booking ID to pay for (e.g. 'BK-A1B2C3D4')."
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Payment amount in USD. Must match the booking total."
+        }
+      },
+      "required": [
+        "booking_id",
+        "amount"
+      ]
+    }
+  },
+  {
+    "name": "confirm_booking",
+    "description": "Confirm a booking after payment. Updates status from PAID to CONFIRMED.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "description": "The booking ID to confirm (e.g. 'BK-A1B2C3D4')."
+        }
+      },
+      "required": [
+        "booking_id"
+      ]
+    }
+  },
+  {
+    "name": "cancel_booking",
+    "description": "Cancel a booking and return the room to inventory.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "booking_id": {
+          "type": "string",
+          "description": "The booking ID to cancel (e.g. 'BK-A1B2C3D4')."
+        }
+      },
+      "required": [
+        "booking_id"
+      ]
+    }
+  },
+  {
+    "name": "validate_booking_rules",
+    "description": "Validate business rules BEFORE executing a booking action. ALWAYS call this before book_hotel, confirm_booking, or cancel_booking.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "The action to validate. One of: 'book', 'confirm', 'cancel'.",
+          "enum": [
+            "book",
+            "confirm",
+            "cancel"
+          ]
+        },
+        "guests": {
+          "type": "integer",
+          "description": "Number of guests (required for 'book' action)."
+        },
+        "check_in": {
+          "type": "string",
+          "description": "Check-in date YYYY-MM-DD (required for 'book' action)."
+        },
+        "check_out": {
+          "type": "string",
+          "description": "Check-out date YYYY-MM-DD (required for 'book' action)."
+        },
+        "booking_id": {
+          "type": "string",
+          "description": "Booking ID (required for 'confirm' and 'cancel' actions)."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    }
+  },
+  {
+    "name": "query_knowledge_graph",
+    "description": "Execute a Cypher query (a graph database query language) against the hotel knowledge graph. Use this for hotel amenities, policies, services, comparisons and exact aggregations (counts, averages, filters) — compute them with Cypher instead of estimating. If a query returns nothing, the honest answer is \"no results\"; do not invent data.\nSchema (property names are camelCase):\n  (Hotel {name, address, city, country, guestRating, totalRooms, phone, email})\n  (Room {type, rate, maxOccupancy})   rate = nightly price in USD (numeric)\n  (Amenity {name, description})       e.g. name = \"Outdoor Swimming Pool\"\n  (Policy {name, description})\n  (Service {name, description})\nRelationships: (Hotel)-[:HAS_ROOM]->(Room), (Hotel)-[:OFFERS_AMENITY]->(Amenity), (Hotel)-[:HAS_POLICY]->(Policy), (Hotel)-[:PROVIDES_SERVICE]->(Service).\nFilter location with h.city / h.country. Match amenities case-insensitively: WHERE toLower(a.name) CONTAINS 'pool'. Use h.guestRating for ratings (NOT h.rating).",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "cypher_query": {
+          "type": "string",
+          "description": "A single read-only Cypher statement. Examples: MATCH (h:Hotel) WHERE h.city = 'Las Vegas' RETURN count(h) AS hotels, avg(h.guestRating) AS avgRating | MATCH (h:Hotel)-[:OFFERS_AMENITY]->(a:Amenity) WHERE toLower(a.name) CONTAINS 'pool' RETURN count(DISTINCT h) AS hotels"
+        }
+      },
+      "required": [
+        "cypher_query"
+      ]
+    }
+  }
+]
