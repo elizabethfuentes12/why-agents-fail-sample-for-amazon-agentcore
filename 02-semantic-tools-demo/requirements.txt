@@ -19,5 +19,9 @@ openai>=3.26.0
 # Running the notebooks (token_efficiency_analysis.ipynb,
 # tool_selection_decision.ipynb, model_routing_decision.ipynb)
 jupyter==1.1.1
-nbconvert==7.16.6
+nbconvert==7.17.2
 ipykernel==7.1.0
+
+# Security pin: strands-agents allows mcp<2.2, and mcp 2.0-2.1 has CVE-2026-116686
+# (fixed in 1.30.0 / 2.2.0). Remove once Strands allows mcp>=2.2.
+mcp==1.30.0
