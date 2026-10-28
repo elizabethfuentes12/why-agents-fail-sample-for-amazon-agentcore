@@ -20,8 +20,9 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 
 | # | Demo | What It Solves | Key Result | Stack |
 |:-:|------|----------------|------------|-------|
+| 00 | [Agentic Fundamentals](./00-agentic-fundamentals/) | New to agents? The building blocks the demos use | The agent loop and tools (`@tool`), then hooks that run your code inside the loop | ![Strands Agents](https://img.shields.io/badge/Strands_Agents-00B4D8?style=flat) ![Hooks](https://img.shields.io/badge/Hooks-purple?style=flat) |
 | 01 | [Graph-RAG vs RAG](./01-faq-graphrag-demo/) | Fabricated statistics, incomplete retrieval, out-of-domain hallucination | 73% fewer hallucinations with knowledge graphs | ![Neo4j](https://img.shields.io/badge/Neo4j-4581C3?style=flat&logo=neo4j&logoColor=white) ![FAISS](https://img.shields.io/badge/FAISS-blue?style=flat) |
-| 02 | [Semantic Tool Selection](./02-semantic-tools-demo/) | Wrong tool picks, token waste at scale (~40 tools) | Fewer tokens, higher accuracy; two selectors (FAISS or a decision model) | ![FAISS](https://img.shields.io/badge/FAISS-blue?style=flat) ![Strands Decider](https://img.shields.io/badge/Strands_Decider-green?style=flat) |
+| 02 | [Semantic Tool Selection](./02-semantic-tools-demo/) | Wrong tool picks, token waste at scale (~40 tools) | ~76% fewer input tokens with the same accuracy (10/10); selectors: FAISS or a decision model | ![FAISS](https://img.shields.io/badge/FAISS-blue?style=flat) ![Strands Decider](https://img.shields.io/badge/Strands_Decider-green?style=flat) |
 | 03 | [Multi-Agent Validation](./03-multiagent-demo/) | Undetected hallucinations, fabricated responses | Executor-Validator-Critic cross-check pipeline | ![Swarm](https://img.shields.io/badge/Swarm-green?style=flat) |
 | 04 | [Neurosymbolic Guardrails](./04-neurosymbolic-demo/) | Agents ignoring business rules in prompts | Symbolic rules enforced via lifecycle hooks | ![Hooks](https://img.shields.io/badge/Hooks-purple?style=flat) |
 | 05 | [Agent Steering](./05-steering-demo/) | Hard-blocking stops the task instead of fixing it | Agent self-corrects instead of failing | ![Steering](https://img.shields.io/badge/Steering-orange?style=flat) |
@@ -36,6 +37,8 @@ Built with [Strands Agents](https://strandsagents.com). Similar patterns can be 
 ## How the Demos Connect
 
 Each demo builds on the previous one. You can run any demo independently, but the learning path is designed to be progressive:
+
+**Phase 0, Fundamentals (optional):** [00-agentic-fundamentals](./00-agentic-fundamentals/) covers the agent loop, tools and hooks. Start there if you are new to Strands Agents; skip it if you already know them.
 
 **Phase 1, Understand Failures:** Demos 01-02 show *why* agents fail: RAG hallucinations and tool selection errors backed by academic research.
 

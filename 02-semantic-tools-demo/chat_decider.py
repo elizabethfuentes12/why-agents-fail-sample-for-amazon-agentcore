@@ -32,6 +32,9 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 from dotenv import load_dotenv
+
+# Load .env BEFORE importing semantic_tools: it creates the Neo4j driver at import time.
+load_dotenv()
 # Import strands_decider (torch) BEFORE semantic_tools (neo4j). Loading the neo4j
 # driver's native libs before torch can crash the process with an OpenMP clash on
 # some machines; this order avoids it.
@@ -44,7 +47,6 @@ from strands.hooks import HookProvider, HookRegistry, BeforeInvocationEvent
 
 from semantic_tools import ALL_TOOLS
 
-load_dotenv()
 
 MODEL = BedrockModel(
     model_id="global.anthropic.claude-haiku-4-5-20251001-v1:0",

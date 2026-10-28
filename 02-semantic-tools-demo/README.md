@@ -47,7 +47,7 @@ agent("How much does a room cost at Cliffside Resort?")
 
 ## Honest Framing: What the Numbers Mean
 
-- **Token saving is the solid headline (~73%).** Sending 3 tool descriptions instead of ~40 cuts input tokens on every call, and the saving compounds across a conversation. The notebook prints the exact figure from `result.metrics.accumulated_usage` for your own run.
+- **Token saving is the solid headline (~76%).** Sending 3 tool descriptions instead of ~40 cuts input tokens on every call, and the saving compounds across a conversation. The notebook prints the exact figure from `result.metrics.accumulated_usage` for your own run.
 - **Accuracy is equal-or-better, shown as observed.** A strong small model is non-deterministic, so the notebook measures accuracy both ways (all 40 tools vs top-3) rather than asserting a fixed improvement. Fewer, relevant tools generally help.
 - **The trade-off is real.** Top-k filtering can only help if the right tool is in the top-k. If FAISS misranks the correct tool out of the top-3, the agent can't call it at all. Tune `top_k` and write clear, distinct docstrings; the notebook calls this out.
 
@@ -118,7 +118,7 @@ AWS_PROFILE=<profile> AWS_REGION=us-east-1 python model_routing_with_jev.py
 **OpenAI Decisions API (hosted decision model), for Part 6 of the notebook:**
 
 The [OpenAI Decisions API](https://platform.openai.com/docs/guides/decisions)
-(public beta, Oct 2026) is a hosted decision model like Jev: it returns a typed
+(generally available since Oct 2026) is a hosted decision model like Jev: it returns a typed
 `choice` with confidence over the tool names — no embeddings, no index, no
 generated text. It runs on `gpt-6-luna` and is billed on **input tokens only**
 ($0.10 / 1M). Get a key from the [OpenAI dashboard](https://platform.openai.com/api-keys),
@@ -197,7 +197,7 @@ images). See `chat_decider.py` and Parts 5–6 of the notebook.
 ## Further Reading
 
 - [Introducing Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/) — the open-source Strands decision model (2B) used in `chat_decider.py` and Part 5.
-- [OpenAI Decisions API](https://platform.openai.com/docs/guides/decisions) — the hosted decision model (`gpt-6-luna`, public beta) used in Part 6: a bounded `choice`/`predicate`/`score` call billed on input tokens only.
+- [OpenAI Decisions API](https://platform.openai.com/docs/guides/decisions) — the hosted decision model (`gpt-6-luna`, generally available) used in Part 6: a bounded `choice`/`predicate`/`score` call billed on input tokens only.
 
 - [Internal Representations as Indicators of Hallucinations in Agent Tool Selection](https://arxiv.org/abs/2601.05214) — source of the tool-calling hallucination taxonomy. It detects hallucinations from a model's internal representations; it does not evaluate embedding pre-filtering, so none of this demo's numbers come from it.
 - [Search for tools in your Amazon Bedrock AgentCore Gateway with a natural-language query](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-using-mcp-semantic-search.html) — the same idea as a managed service for production MCP tool routing.
@@ -206,7 +206,7 @@ images). See `chat_decider.py` and Parts 5–6 of the notebook.
 
 ### How much does semantic tool selection reduce token usage?
 
-A lot — the demo measures it rather than asserting a figure. Instead of sending ~40 tool descriptions on every query, the hook sends the top 3. In the notebook's run that is roughly a 73% reduction, and it repeats on every turn. The exact number depends on how many tools you have and how long their docstrings are; the notebook prints the figure for your own run.
+A lot — the demo measures it rather than asserting a figure. Instead of sending ~40 tool descriptions on every query, the hook sends the top 3. In the notebook's run (27-Oct-2026: 69,975 → 16,183 input tokens over 10 questions, both 10/10 correct) that is roughly a 76% reduction, and it repeats on every turn. The exact number depends on how many tools you have and how long their docstrings are; the notebook prints the figure for your own run.
 
 ### Does filtering tools break conversation memory?
 
